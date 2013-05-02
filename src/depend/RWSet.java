@@ -16,12 +16,11 @@ import com.ibm.wala.classLoader.IMethod;
  ***/
 public class RWSet {
   
-  public static AccessInfo makeAccessInfo(
-      IClass accessClass, 
+  public static AccessInfo makeAccessInfo( 
       IMethod accessMethod, 
       int accessLineNumber, 
       IField ifield) {    
-    return new AccessInfo(accessClass, accessMethod, accessLineNumber, ifield);
+    return new AccessInfo(accessMethod.getDeclaringClass(), accessMethod, accessLineNumber, ifield);
   }
   
   protected Set<AccessInfo> readSet, writeSet;

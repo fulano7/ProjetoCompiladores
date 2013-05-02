@@ -8,17 +8,10 @@ case "$1" in
 	### 101 project
 	NAME="101"
 	JARFILE="101.jar"
-<<<<<<< HEAD
 	PREFIX="companies101/org/softlang"
 	LINE="37"
 	CLASS="Lcompanies101/org/softlang/swing/model/Model"
 	METHOD="getTotal()Ljava/lang/String;"
-=======
-	PREFIX="org/softlang"
-	LINE="22"
-	CLASS="Lorg/softlang/swing/model/Model"
-	METHOD="n_(Lexamples/A;Lexamples/C;)V"
->>>>>>> Adding git ignore
 	;;
     "coffee" ) 
 	### coffee project
