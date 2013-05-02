@@ -14,9 +14,5 @@
 	<classpathentry kind="lib" path="libs/javaparser-1.0.8.jar"/>
 	<classpathentry kind="lib" path="libs/wala-r3501-slice.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core.tests"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.shrike"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
