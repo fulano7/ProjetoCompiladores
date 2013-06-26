@@ -50,6 +50,12 @@ public class TestCoffeeMaker {
     Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
   }
 
+  /*
+   * NOTE: There is no point in this test as targeting line 99 of the CoffeeMaker.java class
+   * should result in the same output as selecting no target line at all.
+   * Since the expected data for this test is old (and wrong) this test will be failing until
+   * removed or reworked!
+   */
   @Test
   public void testAnalysisWithLineContents() throws Exception {
     String strCompUnit = USER_DIR + SEP + "src-examples/coffeemaker/CoffeeMaker.java";
