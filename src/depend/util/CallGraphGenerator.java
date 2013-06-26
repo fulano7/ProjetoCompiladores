@@ -30,6 +30,8 @@ public class CallGraphGenerator {
   AnalysisScope scope;
   ClassHierarchy cha;
 
+  private CallGraph cg;
+
   public CallGraphGenerator(AnalysisScope scope, ClassHierarchy cha) throws IOException, ClassHierarchyException {
     this.scope = scope;
     this.cha = cha;
@@ -48,14 +50,15 @@ public class CallGraphGenerator {
   }
 
   public CallGraph getFullCallGraph() throws CallGraphBuilderCancelException {
-    Iterable<Entrypoint> entrypoints = entryPoints(scope.getApplicationLoader(), cha);
-    AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
-    com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroCFABuilder(options, new AnalysisCache(), cha, scope);
-    CallGraph cg = builder.makeCallGraph(options, null);
+    if(this.cg == null){
+      Iterable<Entrypoint> entrypoints = entryPoints(scope.getApplicationLoader(), cha);
+      AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
+      com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroCFABuilder(options, new AnalysisCache(), cha, scope);
+      this.cg = builder.makeCallGraph(options, null);
+    }
     return cg;
   }
 
-  // TODO: Why is this an attribute? Minor performance optimization?
   private HashSet<Entrypoint> result = HashSetFactory.make();
 
   private Iterable<Entrypoint> entryPoints(ClassLoaderReference clr, IClassHierarchy cha) {
