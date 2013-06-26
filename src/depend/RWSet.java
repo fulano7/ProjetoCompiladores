@@ -2,7 +2,6 @@ package depend;
 
 import java.util.Set;
 
-import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.IMethod;
 
@@ -31,22 +30,6 @@ public class RWSet {
     this.writeSet = writeSet;
   }
 
-  /**
-   * Returns a new <code>RWSet</code> by merging this readSet/writeSet with <code>other</code>'s readSet/writeSet.
-   * Changes in the source <code>RWSet</code>s won't affect the returned set or vice-versa.
-   * @param other the other <code>RWSet</code> to merge with this
-   * @return a new RWSet representing the union of this' readSet/writeSet and <code>other</code>'s readSet/writeSet  
-   */
-  public RWSet merge(RWSet other){
-    // TODO: Deal with null readSet/writeSets? Or we are assume they can't be null?
-//    Map<Set<FieldReference>,String> mergedReadSet = new HashSet<FieldReference>(this.readSet);
-//    mergedReadSet.addAll(other.readSet);
-//    Set<FieldReference> mergedWriteSet = new HashSet<FieldReference>(this.writeSet);
-//    mergedWriteSet.addAll(other.writeSet);
-//    return new RWSet(mergedReadSet, mergedWriteSet);
-    return null;
-  }
-  
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("READS FROM:");
