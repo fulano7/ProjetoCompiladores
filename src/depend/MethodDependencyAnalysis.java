@@ -39,6 +39,7 @@ import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAArrayLoadInstruction;
 import com.ibm.wala.ssa.SSAArrayReferenceInstruction;
 import com.ibm.wala.ssa.SSAArrayStoreInstruction;
+import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAFieldAccessInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
@@ -446,7 +447,7 @@ public class MethodDependencyAnalysis {
       if (sourceLine >= 0) {
         reads = new HashSet<AccessInfo>();
         callSites = new HashSet<CallSiteReference>();
-        this.findFlowingReadSet(method, sourceLine, cg, reads, callSites);
+        this.findFlowingInfo(method, sourceLine, cg, reads, callSites);
       }
       for (AccessInfo access : reads) {
         this.fillGraph(method, dependencyGraph, false, false, access, true);
@@ -583,7 +584,7 @@ public class MethodDependencyAnalysis {
    * @param cg the callgraph used to build the control flow graph
    * @return
    */
-  private Set<AccessInfo> findFlowingReadSet(IMethod method, int sourceLine, CallGraph cg,
+  private Set<AccessInfo> findFlowingInfo(IMethod method, int sourceLine, CallGraph cg,
                                               Set<AccessInfo> reads,
                                               Set<CallSiteReference> callSites){
     AbstractInterproceduralCFG<ISSABasicBlock> interproceduralCFG = new InterproceduralCFG(cg);
@@ -597,47 +598,39 @@ public class MethodDependencyAnalysis {
      * and as such there should be only one CGNode for each method.
      */
     Set<CGNode> cgNodes = cg.getNodes(method.getReference());
-    for (CGNode cgNode : cgNodes) { 
-      ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = interproceduralCFG.getCFG(cgNode);
-      Queue<ISSABasicBlock> blocksWorkList = new LinkedList<ISSABasicBlock>(initialBlocks);
-      Set<ISSABasicBlock> visitedBlocks = new HashSet<ISSABasicBlock>();
-      while(!blocksWorkList.isEmpty()){
-        ISSABasicBlock block = blocksWorkList.poll();
-        visitFlowingBlock(block, cgNode, cg, reads, callSites);
-        visitedBlocks.add(block);
-        addToWorkList(cfg.getPredNodes(block), blocksWorkList, visitedBlocks);
+    if(cgNodes.size() > 0){
+      for (CGNode cgNode : cgNodes) { 
+        ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = interproceduralCFG.getCFG(cgNode);
+        doFlowingInfoAnalysis(cg, reads, callSites, initialBlocks, cgNode.getMethod(), cgNode, cfg);
       }
+    } else {
+      SSACFG cfg = cache.getIR(method).getControlFlowGraph();
+      doFlowingInfoAnalysis(cg, reads, callSites, initialBlocks, method, null, cfg);
     }
-    
     return reads;
   }
 
-  private void findEscapingInfo(IMethod method, int sourceLine, CallGraph cg,
-                                Set<AccessInfo> writes, Set<CallSiteReference> callSites){
-    AbstractInterproceduralCFG<ISSABasicBlock> interproceduralCFG = new InterproceduralCFG(cg);
-
-    List<ISSABasicBlock> initialBlocks = this.getBasicBlocksForSourceLine(method, sourceLine);
-
-    Set<CGNode> cgNodes = cg.getNodes(method.getReference());
-    for (CGNode cgNode : cgNodes) { 
-      ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = interproceduralCFG.getCFG(cgNode);
-      Queue<ISSABasicBlock> blocksWorkList = new LinkedList<ISSABasicBlock>(initialBlocks);
-      Set<ISSABasicBlock> visitedBlocks = new HashSet<ISSABasicBlock>();
-      while(!blocksWorkList.isEmpty()){
-        ISSABasicBlock block = blocksWorkList.poll();
-        visitEscapingBlock(block, cgNode, cg, writes, callSites);
-        visitedBlocks.add(block);
-        addToWorkList(cfg.getSuccNodes(block), blocksWorkList, visitedBlocks);
-      }
+  private void doFlowingInfoAnalysis(CallGraph cg, Set<AccessInfo> reads,
+                                      Set<CallSiteReference> callSites,
+                                      List<ISSABasicBlock> initialBlocks,
+                                      IMethod method, CGNode cgNode,
+                                      ControlFlowGraph<SSAInstruction,
+                                      ISSABasicBlock> cfg) {
+    Queue<ISSABasicBlock> blocksWorkList = new LinkedList<ISSABasicBlock>(initialBlocks);
+    Set<ISSABasicBlock> visitedBlocks = new HashSet<ISSABasicBlock>();
+    while(!blocksWorkList.isEmpty()){
+      ISSABasicBlock block = blocksWorkList.poll();
+      visitFlowingBlock(block, method, cgNode, cg, reads, callSites);
+      visitedBlocks.add(block);
+      addToWorkList(cfg.getPredNodes(block), blocksWorkList, visitedBlocks);
     }
   }
 
-  private void visitFlowingBlock(ISSABasicBlock block, CGNode methodNode, CallGraph cg,
-                                  Set<AccessInfo> reads, Set<CallSiteReference> callSites) {
-    IMethod method = methodNode.getMethod();
+  private void visitFlowingBlock(ISSABasicBlock block, IMethod method, CGNode methodNode, CallGraph cg,
+      Set<AccessInfo> reads, Set<CallSiteReference> callSites) {
     RWSet methodRWSet = rwSets.get(method);
     Set<AccessInfo> readSet = methodRWSet.readSet;
-
+    
     Set<IMethod> methods = this.rwSets.keySet();
     int instructionIndex = block.getFirstInstructionIndex();
     Iterator<SSAInstruction> blockIterator = block.iterator();
@@ -649,9 +642,11 @@ public class MethodDependencyAnalysis {
       }
       if(ssaInstruction instanceof SSAInvokeInstruction){
         SSAInvokeInstruction invokeInstruction = (SSAInvokeInstruction) ssaInstruction;
-        for (CGNode possibleTarget : cg.getPossibleTargets(methodNode, invokeInstruction.getCallSite())) {
-          if (methods.contains(possibleTarget.getMethod())) {
-            reads.addAll(rwSets.get(possibleTarget.getMethod()).readSet);
+        if(methodNode != null){
+          for (CGNode possibleTarget : cg.getPossibleTargets(methodNode, invokeInstruction.getCallSite())) {
+            if (methods.contains(possibleTarget.getMethod())) {
+              reads.addAll(rwSets.get(possibleTarget.getMethod()).readSet);
+            }
           }
         }
         callSites.add(invokeInstruction.getCallSite());
@@ -662,9 +657,51 @@ public class MethodDependencyAnalysis {
     }
   }
 
-  private void visitEscapingBlock(ISSABasicBlock block, CGNode methodNode, CallGraph cg,
-                                   Set<AccessInfo> writes, Set<CallSiteReference> callSites) {
-    IMethod method = methodNode.getMethod();
+  /* ############################ ESCAPING INFO ANALYSIS ############################ */
+  /*
+   * TODO: The following three methods implement the escaping analysis, they are, however, almost
+   * code clones of the previous three methods and it is *highly* recommended to find a away
+   * to refactor them out of here.
+   */
+  
+  private void findEscapingInfo(IMethod method, int sourceLine, CallGraph cg,
+                                Set<AccessInfo> writes, Set<CallSiteReference> callSites){
+    AbstractInterproceduralCFG<ISSABasicBlock> interproceduralCFG = new InterproceduralCFG(cg);
+
+    List<ISSABasicBlock> initialBlocks = this.getBasicBlocksForSourceLine(method, sourceLine);
+
+    Set<CGNode> cgNodes = cg.getNodes(method.getReference());
+    if(cgNodes.size() > 0){
+      for (CGNode cgNode : cgNodes) { 
+        ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = interproceduralCFG.getCFG(cgNode);
+        doEscapingInfoAnalysis(cg, writes, callSites, initialBlocks, cgNode.getMethod(), cgNode, cfg);
+      }
+    } else {
+      // Oddly our method has no corresponding node in the callgraph.
+      ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = cache.getIR(method).getControlFlowGraph();
+      doEscapingInfoAnalysis(cg, writes, callSites, initialBlocks, method, null, cfg);
+    }
+  }
+
+  private void doEscapingInfoAnalysis(CallGraph cg, Set<AccessInfo> writes,
+                                      Set<CallSiteReference> callSites,
+                                      List<ISSABasicBlock> initialBlocks,
+                                      IMethod method, CGNode cgNode,
+                                      ControlFlowGraph<SSAInstruction,
+                                      ISSABasicBlock> cfg) {
+    Queue<ISSABasicBlock> blocksWorkList = new LinkedList<ISSABasicBlock>(initialBlocks);
+    Set<ISSABasicBlock> visitedBlocks = new HashSet<ISSABasicBlock>();
+    while(!blocksWorkList.isEmpty()){
+      ISSABasicBlock block = blocksWorkList.poll();
+      visitEscapingBlock(block, method, cgNode, cg, writes, callSites);
+      visitedBlocks.add(block);
+      addToWorkList(cfg.getSuccNodes(block), blocksWorkList, visitedBlocks);
+    }
+  }
+
+  private void visitEscapingBlock(ISSABasicBlock block, IMethod method, CGNode methodNode,
+                                    CallGraph cg, Set<AccessInfo> writes,
+                                    Set<CallSiteReference> callSites) {
     RWSet methodRWSet = rwSets.get(method);
     Set<AccessInfo> writeSet = methodRWSet.writeSet;
 
@@ -679,9 +716,11 @@ public class MethodDependencyAnalysis {
       }
       if(ssaInstruction instanceof SSAInvokeInstruction){
         SSAInvokeInstruction invokeInstruction = (SSAInvokeInstruction) ssaInstruction;
-        for (CGNode possibleTarget : cg.getPossibleTargets(methodNode, invokeInstruction.getCallSite())) {
-          if (methods.contains(possibleTarget.getMethod())) {
-            writes.addAll(rwSets.get(possibleTarget.getMethod()).writeSet);
+        if(methodNode != null){
+          for (CGNode possibleTarget : cg.getPossibleTargets(methodNode, invokeInstruction.getCallSite())) {
+            if (methods.contains(possibleTarget.getMethod())) {
+              writes.addAll(rwSets.get(possibleTarget.getMethod()).writeSet);
+            }
           }
         }
         callSites.add(invokeInstruction.getCallSite());
@@ -714,6 +753,8 @@ public class MethodDependencyAnalysis {
     }
   }
 
+  /* ############################ END OF ESCAPING INFO ANALYSIS ############################ */
+  
   /**
    * Returns the IField for the {@link FieldReference} contained in instruction <code>fieldAccessInstruction</code>.
    * @param fieldAccessInstruction
