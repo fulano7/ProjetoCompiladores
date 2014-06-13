@@ -10,4 +10,10 @@ do
     CLASSPATH=$CLASSPATH:$x
 done
 
-DOTPATH="/usr/local/bin/dot"
+OS_KERNEL=`uname -s`
+if [ $OS_KERNEL = "Darwin" ]
+    then
+        DOTPATH="/usr/local/bin/dot"
+    else
+        DOTPATH="/usr/bin/dot"
+fi

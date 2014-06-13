@@ -45,20 +45,10 @@ public class Main {
     }
 
     MethodDependencyAnalysis mDepAn = createMDA(args);
-    
-    // find informed class
-    String strClass = Util.getStringProperty("targetClass");
-    IClass clazz = mDepAn.getCHA().lookupClass(TypeReference.findOrCreate(ClassLoaderReference.Application, strClass));
-    if (clazz == null) {
-      throw new RuntimeException("Could not find class \"" + strClass + "\"");
-    }
-
+    // find informed class    
+    IClass clazz = findClass(mDepAn);
     //  find informed method
-    String strMethod = Util.getStringProperty("targetMethod");
-    IMethod method = clazz.getMethod(Selector.make(strMethod));
-    if (method == null) {
-      throw new RuntimeException("Could not find method \"" + strMethod + "\" in " + clazz.getName());
-    }
+    IMethod method = findMethod(clazz);
     
     SimpleGraph depGraph = run(mDepAn, method);
     
@@ -67,7 +57,25 @@ public class Main {
 
   }
 
-  private static SimpleGraph run(MethodDependencyAnalysis mDepAn, IMethod method) throws IOException, WalaException, CancelException {
+  public static IMethod findMethod(IClass clazz) {
+    String strMethod = Util.getStringProperty("targetMethod");
+    IMethod method = clazz.getMethod(Selector.make(strMethod));
+    if (method == null) {
+      throw new RuntimeException("Could not find method \"" + strMethod + "\" in " + clazz.getName());
+    }
+    return method;
+  }
+
+  public static IClass findClass(MethodDependencyAnalysis mDepAn) {
+    String strClass = Util.getStringProperty("targetClass");
+    IClass clazz = mDepAn.getCHA().lookupClass(TypeReference.findOrCreate(ClassLoaderReference.Application, strClass));
+    if (clazz == null) {
+      throw new RuntimeException("Could not find class \"" + strClass + "\"");
+    }
+    return clazz;
+  }
+
+  public static SimpleGraph run(MethodDependencyAnalysis mDepAn, IMethod method) throws IOException, WalaException, CancelException {
     // run the dependency analysis
     mDepAn.run();
     
@@ -82,7 +90,10 @@ public class Main {
     } 
     
     // build dependency graph
-    return mDepAn.getDependencies(method, false, false, line);
+    boolean forwardDependencies = Util.getBooleanProperty(Util.FORWARD_DEPENDENCIES_PROPERTY_NAME,
+                                                          false);
+    boolean withIndirects = Util.getBooleanProperty(Util.WITH_INDIRECTS_PROPERTY_NAME, false);
+    return mDepAn.getDependenciesGraph(method, line, forwardDependencies, withIndirects);
 
   }
 
@@ -157,10 +168,9 @@ public class Main {
     MethodDependencyAnalysis mda = createMDA(args);
     
     // find informed class
-    String strClass = Util.getStringProperty("targetClass");
     IClass clazz = mda.getCHA().lookupClass(TypeReference.findOrCreate(ClassLoaderReference.Application, targetClass));
     if (clazz == null) {
-      throw new RuntimeException("Could not find class \"" + strClass + "\"");
+      throw new RuntimeException("Could not find class \"" + targetClass + "\"");
     }
     // find informed method
     IMethod imethod = findMethod(mda, clazz, targetLine);

@@ -12,6 +12,7 @@ import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
@@ -29,17 +30,15 @@ public class CallGraphGenerator {
   AnalysisScope scope;
   ClassHierarchy cha;
 
+  private CallGraph cg;
+
   public CallGraphGenerator(AnalysisScope scope, ClassHierarchy cha) throws IOException, ClassHierarchyException {
     this.scope = scope;
     this.cha = cha;
   }
 
-  public Graph<CGNode> getCallGraph() throws WalaException, IllegalArgumentException, CancelException, IOException {
-    Iterable<Entrypoint> entrypoints = entryPoints(scope.getApplicationLoader(), cha);
-    AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
-    com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroCFABuilder(options, new AnalysisCache(), cha, scope);
-    //    com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroOneCFABuilder(options, new AnalysisCache(), cha, scope);
-    CallGraph cg = builder.makeCallGraph(options, null);
+  public Graph<CGNode> getPrunedCallGraph() throws WalaException, IllegalArgumentException, CancelException, IOException {
+    CallGraph cg = getFullCallGraph();
     
     return GraphSlicer.prune(cg, new com.ibm.wala.util.Predicate<CGNode>(){
       @Override
@@ -50,7 +49,16 @@ public class CallGraphGenerator {
     
   }
 
-  // TODO: Why is this an attribute? Minor performance optimization?
+  public CallGraph getFullCallGraph() throws CallGraphBuilderCancelException {
+    if(this.cg == null){
+      Iterable<Entrypoint> entrypoints = entryPoints(scope.getApplicationLoader(), cha);
+      AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
+      com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroCFABuilder(options, new AnalysisCache(), cha, scope);
+      this.cg = builder.makeCallGraph(options, null);
+    }
+    return cg;
+  }
+
   private HashSet<Entrypoint> result = HashSetFactory.make();
 
   private Iterable<Entrypoint> entryPoints(ClassLoaderReference clr, IClassHierarchy cha) {

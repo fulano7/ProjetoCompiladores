@@ -14,6 +14,8 @@ public class SimpleGraph {
 
   private Set<Edge> edges = new HashSet<Edge>();
 
+  private IMethod targetMethod;
+
   public String toDotString() {
     StringBuffer sb = new StringBuffer();
     sb.append("digraph \"DirectedGraph\" {\n");
@@ -21,7 +23,11 @@ public class SimpleGraph {
     sb.append(" center=true;\n");
     sb.append(" fontsize=6;\n");
     sb.append(" node [ color=blue,shape=\"box\"fontsize=6,fontcolor=black,fontname=Arial];\n");
-    sb.append(" edge [ color=black,fontsize=6,fontcolor=black,fontname=Arial];\n");    
+    sb.append(" edge [ color=black,fontsize=6,fontcolor=black,fontname=Arial];\n");
+    if(this.getTargetMethod() != null){
+      sb.append("\"").append(toString(this.getTargetMethod())).append("\"");
+      sb.append("[").append("color=\"red\", fontsize=\"6\", fontname=\"Arial\"").append("];").append("\n");
+    }
     sb.append(toString());
     sb.append("}\n");
     return sb.toString();
@@ -57,6 +63,10 @@ public class SimpleGraph {
       sb.append(edge.writerLine);
 
       sb.append("\"");
+      if(!edge.direct){
+        sb.append(";").append("style=dashed");
+        sb.append(";").append("arrowhead=\"none\"");
+      }
       sb.append(" ]");
       
       // update array
@@ -133,6 +143,14 @@ public class SimpleGraph {
 
   public void add(Edge edge) {
     edges.add(edge);
+  }
+
+  public IMethod getTargetMethod() {
+    return targetMethod;
+  }
+
+  public void setTargetMethod(IMethod targetMethod) {
+    this.targetMethod = targetMethod;
   }
 
 }

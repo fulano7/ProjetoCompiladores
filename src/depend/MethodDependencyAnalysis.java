@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 
+import com.ibm.wala.cfg.ControlFlowGraph;
+import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IBytecodeMethod;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
@@ -21,21 +25,27 @@ import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
+import com.ibm.wala.ipa.cfg.AbstractInterproceduralCFG;
+import com.ibm.wala.ipa.cfg.InterproceduralCFG;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAArrayLoadInstruction;
 import com.ibm.wala.ssa.SSAArrayReferenceInstruction;
 import com.ibm.wala.ssa.SSAArrayStoreInstruction;
+import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAFieldAccessInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.types.FieldReference;
-import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.ReverseIterator;
@@ -80,6 +90,12 @@ public class MethodDependencyAnalysis {
   static AnalysisCache cache;
   // application(instance)-specific caches
   private Map<IMethod, RWSet> rwSets = new HashMap<IMethod, RWSet>();
+
+  /**
+   * Callgraph generator for this analysis
+   */
+  private CallGraphGenerator cgGenerator;
+
   Timer timer = new Timer();
   Properties p;
   /**
@@ -144,8 +160,8 @@ public class MethodDependencyAnalysis {
     if (PROPAGATE_CALLS) {
 
       // building the call graph
-      CallGraphGenerator cgg = new CallGraphGenerator(scope, getCHA());
-      Graph<CGNode> graph = cgg.getCallGraph();
+      CallGraphGenerator cgg = this.getCallGraphGenerator();
+      Graph<CGNode> graph = cgg.getPrunedCallGraph();
       if (debugTime) {
         timer.stop();
         timer.show("done building call graph");
@@ -401,118 +417,149 @@ public class MethodDependencyAnalysis {
     }
   }
 
-  public SimpleGraph getDependencies(IMethod method, boolean onlyPublicClasses,
-      boolean onlyPublicMethods, int strLine) {
+  /**
+   * Returns the dependencies graph for method <code>method</code> and possibly filtering the
+   * result by choosing a target line <code>sourceLine</code>.
+   * If <code>isWriterMethod</code> is <code>true</code> this method will return a graph for the
+   * dependents of <code>method</code>, else the graph will contain mostly the methods to which <code>method</code>
+   * depends.
+   * @param method
+   * @param sourceLine
+   * @param forwardDependencies
+   * @param withIndirects 
+   * @return
+   * @throws CallGraphBuilderCancelException
+   * @throws ClassHierarchyException
+   * @throws IOException
+   */
+  public SimpleGraph getDependenciesGraph(IMethod method, int sourceLine,
+                                           boolean forwardDependencies, boolean withIndirects)
+          throws CallGraphBuilderCancelException, ClassHierarchyException, IOException {
     if (method == null) {
       throw new RuntimeException("Could not find informed method!");
     }
+    SimpleGraph dependencyGraph = new SimpleGraph();
 
-    SimpleGraph result = new SimpleGraph();
-    /********* find transitive method writers *********/
-    Set<AccessInfo> reads = rwSets.get(method).readSet;
+    if(!forwardDependencies){
+      Set<AccessInfo> reads = rwSets.get(method).readSet;
+      Set<CallSiteReference> callSites = null;
+      CallGraph cg = this.getCallGraphGenerator().getFullCallGraph();
+      if (sourceLine >= 0) {
+        reads = new HashSet<AccessInfo>();
+        callSites = new HashSet<CallSiteReference>();
+        this.findFlowingInfo(method, sourceLine, cg, reads, callSites);
+      }
+      for (AccessInfo access : reads) {
+        this.fillGraph(method, dependencyGraph, false, false, access, true);
+      }
 
-    if (strLine == -1) {
-      findDependency(method, result, reads);
+      if(withIndirects){
+        this.fillGraphWithIndirects(dependencyGraph, method, callSites, cg,
+            new HashSet<IMethod>(), true);
+      }
     } else {
-      Set<AccessInfo> indirectReads = indirectReadSets(method, strLine);
-      findDependency(method, result, reads, strLine, indirectReads);
+      Set<AccessInfo> writes = rwSets.get(method).writeSet;
+      Set<CallSiteReference> callSites = null;
+      CallGraph cg = this.getCallGraphGenerator().getFullCallGraph();
+      if (sourceLine >= 0) {
+        writes = new HashSet<AccessInfo>();
+        callSites = new HashSet<CallSiteReference>();
+        this.findEscapingInfo(method, sourceLine, cg, writes, callSites);
+      }
+      for (AccessInfo access : writes) {
+        this.fillGraph(method, dependencyGraph, false, false, access, false);
+      }
+
+      if(withIndirects){
+        this.fillGraphWithIndirects(dependencyGraph, method, callSites, cg,
+            new HashSet<IMethod>(), false);
+      }
     }
-    return result;
+    dependencyGraph.setTargetMethod(method);
+    return dependencyGraph;
   }
 
-  /**
-   *  Find out if there is an invocation within the line number. If there is, then the RWSets
-   *  of that invocation must be taken into consideration when computing the dependencies.
-   *  See issue #11.
-   */
-  private Set<AccessInfo> indirectReadSets(IMethod method, int line) {
-    IR ir = cache.getIRFactory().makeIR(method, Everywhere.EVERYWHERE, options.getSSAOptions());
-    
-    Set<AccessInfo> indirectReads = new HashSet<AccessInfo>();
-    Set<IMethod> methodsWithRWSets = rwSets.keySet();
-    SSAInstruction[] instructions = ir.getInstructions();
-    for (int i = 0; i < instructions.length; i++) {
-      SSAInstruction instruction = instructions[i];
-      if (instruction == null) {
-        continue;
+  private void fillGraphWithIndirects(SimpleGraph graph, IMethod method,
+                                      Set<CallSiteReference> callSites,
+                                      CallGraph cg, Set<IMethod> visited, boolean isReadAccess){
+    if(!visited.contains(method)){
+      visited.add(method);
+      Set<CGNode> nodes = cg.getNodes(method.getReference());
+      for (CGNode cgNode : nodes) {
+        if(callSites != null){
+          for (CallSiteReference callSiteReference : callSites) {
+            Set<CGNode> possibleTargets = cg.getPossibleTargets(cgNode, callSiteReference) ;
+            addIndirectEdges(graph, isReadAccess, possibleTargets, cgNode.getMethod());
+          }
+        } else {
+          Set<CGNode> allPossibleTargets = toSet(cg.getSuccNodes(cgNode));
+          addIndirectEdges(graph, isReadAccess, allPossibleTargets, cgNode.getMethod());
+        }
+        Iterator<CGNode> succNodes = cg.getSuccNodes(cgNode);
+        while (succNodes.hasNext()) {
+          CGNode successorNode = (CGNode) succNodes.next();
+          fillGraphWithIndirects(graph, successorNode.getMethod(), null, cg, visited, isReadAccess);
+        }
       }
-      IBytecodeMethod bMethod = (IBytecodeMethod) ir.getMethod();
-      int sourceLineNum = -1;
-      try {
-        sourceLineNum = bMethod.getLineNumber(bMethod.getBytecodeIndex(i));
-      } catch (InvalidClassFileException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-        break;
-      }
-      if (sourceLineNum != line) {
-        continue;
-      }
-      if (instruction instanceof SSAInvokeInstruction) {
-        SSAInvokeInstruction invokeIntruction = (SSAInvokeInstruction) instruction;
-        MethodReference callSite = invokeIntruction.getCallSite().getDeclaredTarget();
-        for (IMethod possibleTarget : getCHA().getPossibleTargets(callSite)) {
-          // Some targets might not have had their RWSets computed
-          if (methodsWithRWSets.contains(possibleTarget)) {
-            indirectReads.addAll(rwSets.get(possibleTarget).readSet);
+    }
+  }
+
+  private void addIndirectEdges(SimpleGraph graph, boolean isReadAccess,
+      Set<CGNode> possibleTargets, IMethod callerMethod) {
+    for (CGNode possibleTarget : possibleTargets) {
+      RWSet rwSet = this.rwSets.get(possibleTarget.getMethod());
+      if(rwSet != null){
+        if(isReadAccess){
+          Set<AccessInfo> readSet = rwSet.readSet;
+          for (AccessInfo accessInfo : readSet) {
+            graph.add(new Edge(accessInfo.accessMethod, accessInfo.accessLineNumber,
+                                callerMethod, accessInfo.accessLineNumber,
+                                accessInfo.iField, false));
+          }
+        } else {
+          Set<AccessInfo> writeSet = rwSet.writeSet;
+          for (AccessInfo accessInfo : writeSet) {
+            graph.add(new Edge(callerMethod, accessInfo.accessLineNumber,
+                                accessInfo.accessMethod, accessInfo.accessLineNumber,
+                                accessInfo.iField, false));
           }
         }
       }
     }
-    return indirectReads;
   }
 
-  private void findDependency(
-      IMethod method, 
-      SimpleGraph result,
-      Set<AccessInfo> reads, 
-      int strLine, 
-      Set<AccessInfo> indirectReads) {
-    boolean onlyPublicClasses = false;
-    boolean onlyPublicMethods = false;
-    for (AccessInfo access : reads) {
-      int line = access.accessLineNumber;
-      if (line != strLine) {
-        continue;
-      }
-      fillGraph(method, result, onlyPublicClasses, onlyPublicMethods, access);
-    }
-    for (AccessInfo access : indirectReads) {
-      fillGraph(method, result, onlyPublicClasses, onlyPublicMethods, access);
-    }
-  }
-
-  private void findDependency(IMethod method, SimpleGraph result,
-      Set<AccessInfo> reads) {
-    boolean onlyPublicClasses = false;
-    boolean onlyPublicMethods = false;
-    for (AccessInfo access : reads) {
-      fillGraph(method, result, onlyPublicClasses, onlyPublicMethods, access);
-    }
-  }
-
-  private void fillGraph(
-      IMethod method, 
-      SimpleGraph result,
-      boolean onlyPublicClasses, 
-      boolean onlyPublicMethods, 
-      AccessInfo readAccessInfo) {
+  private void fillGraph(IMethod method, SimpleGraph result, boolean onlyPublicClasses,
+                          boolean onlyPublicMethods, AccessInfo accessInfo,
+                          boolean isReadAccess) {
     for (Map.Entry<IMethod, RWSet> entry : rwSets.entrySet()) {
-      IMethod writer = entry.getKey();
-      if (onlyPublicClasses && !writer.getDeclaringClass().isPublic()) {
+      IMethod accessor = entry.getKey();
+      if (onlyPublicClasses && !accessor.getDeclaringClass().isPublic()) {
         continue;
       }
-      if (onlyPublicMethods && !writer.isPublic()) {
+      if (onlyPublicMethods && !accessor.isPublic()) {
         continue;
       }
-      Set<AccessInfo> writeSet = entry.getValue().writeSet;
-      for (AccessInfo writeAccessInfo : writeSet) {
-        if (writeAccessInfo.iField.equals(readAccessInfo.iField)) {
-          //result.getNode(writer).add(new Edge(method, fr, writeAccessInfo.accessLineNumber));
-          Edge edge = 
-              new Edge(writeAccessInfo.accessMethod, writeAccessInfo.accessLineNumber,
-                    readAccessInfo.accessMethod, readAccessInfo.accessLineNumber, 
-                    writeAccessInfo.iField);
+      
+      Set<AccessInfo> accessSet = isReadAccess ? entry.getValue().writeSet : entry.getValue().readSet;
+      for (AccessInfo readOrWriteAccessInfo : accessSet) {
+        IMethod writer;
+        int writeLineNumber;
+        IMethod reader;
+        int readLineNumber;
+        if (readOrWriteAccessInfo.iField.equals(accessInfo.iField)) {
+          if(isReadAccess){
+            writer = readOrWriteAccessInfo.accessMethod;
+            writeLineNumber = readOrWriteAccessInfo.accessLineNumber;
+            reader = accessInfo.accessMethod;
+            readLineNumber = accessInfo.accessLineNumber;
+          } else {
+            writer = accessInfo.accessMethod;
+            writeLineNumber = accessInfo.accessLineNumber;
+            reader = readOrWriteAccessInfo.accessMethod;
+            readLineNumber = readOrWriteAccessInfo.accessLineNumber;
+          }
+          Edge edge = new Edge(writer, writeLineNumber, reader, readLineNumber,
+                                readOrWriteAccessInfo.iField);
           result.add(edge);
         }
       }
@@ -521,6 +568,297 @@ public class MethodDependencyAnalysis {
 
   public ClassHierarchy getCHA() {
     return cha;
+  }
+
+  public CallGraphGenerator getCallGraphGenerator() throws ClassHierarchyException, IOException{
+    if(this.cgGenerator == null){
+      this.cgGenerator = new CallGraphGenerator(this.scope, this.getCHA());
+    }
+    return this.cgGenerator;
+  }
+
+  /**
+   * Finds the read set that flows to line <code>sourceLine</code> in method <code>method</code>.
+   * @param method target method that contains the source line to find the flowing read set
+   * @param sourceLine
+   * @param cg the callgraph used to build the control flow graph
+   * @return
+   */
+  private Set<AccessInfo> findFlowingInfo(IMethod method, int sourceLine, CallGraph cg,
+                                              Set<AccessInfo> reads,
+                                              Set<CallSiteReference> callSites){
+    AbstractInterproceduralCFG<ISSABasicBlock> interproceduralCFG = new InterproceduralCFG(cg);
+
+    List<ISSABasicBlock> initialBlocks = this.getBasicBlocksForSourceLine(method, sourceLine);
+
+    /* Accounting for all possible CFGs of a given method.
+     * The loop below is just a generalization in case we want to use a more precise callgraph
+     * in the future.
+     * Right now it should iterate only once as we are using a simple 0-CFA callgraph building algorithm
+     * and as such there should be only one CGNode for each method.
+     */
+    Set<CGNode> cgNodes = cg.getNodes(method.getReference());
+    if(cgNodes.size() > 0){
+      for (CGNode cgNode : cgNodes) { 
+        ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = interproceduralCFG.getCFG(cgNode);
+        doFlowingInfoAnalysis(cg, reads, callSites, initialBlocks, cgNode.getMethod(), cgNode, cfg);
+      }
+    } else {
+      SSACFG cfg = cache.getIR(method).getControlFlowGraph();
+      doFlowingInfoAnalysis(cg, reads, callSites, initialBlocks, method, null, cfg);
+    }
+    return reads;
+  }
+
+  private void doFlowingInfoAnalysis(CallGraph cg, Set<AccessInfo> reads,
+                                      Set<CallSiteReference> callSites,
+                                      List<ISSABasicBlock> initialBlocks,
+                                      IMethod method, CGNode cgNode,
+                                      ControlFlowGraph<SSAInstruction,
+                                      ISSABasicBlock> cfg) {
+    Queue<ISSABasicBlock> blocksWorkList = new LinkedList<ISSABasicBlock>(initialBlocks);
+    Set<ISSABasicBlock> visitedBlocks = new HashSet<ISSABasicBlock>();
+    while(!blocksWorkList.isEmpty()){
+      ISSABasicBlock block = blocksWorkList.poll();
+      visitFlowingBlock(block, method, cgNode, cg, reads, callSites);
+      visitedBlocks.add(block);
+      addToWorkList(cfg.getPredNodes(block), blocksWorkList, visitedBlocks);
+    }
+  }
+
+  private void visitFlowingBlock(ISSABasicBlock block, IMethod method, CGNode methodNode, CallGraph cg,
+      Set<AccessInfo> reads, Set<CallSiteReference> callSites) {
+    RWSet methodRWSet = rwSets.get(method);
+    Set<AccessInfo> readSet = methodRWSet.readSet;
+    
+    Set<IMethod> methods = this.rwSets.keySet();
+    int instructionIndex = block.getFirstInstructionIndex();
+    Iterator<SSAInstruction> blockIterator = block.iterator();
+    while (blockIterator.hasNext()) {
+      SSAInstruction ssaInstruction = (SSAInstruction) blockIterator.next();
+      instructionIndex++;
+      if(ssaInstruction == null){
+        continue;
+      }
+      if(ssaInstruction instanceof SSAInvokeInstruction){
+        SSAInvokeInstruction invokeInstruction = (SSAInvokeInstruction) ssaInstruction;
+        if(methodNode != null){
+          for (CGNode possibleTarget : cg.getPossibleTargets(methodNode, invokeInstruction.getCallSite())) {
+            if (methods.contains(possibleTarget.getMethod())) {
+              reads.addAll(rwSets.get(possibleTarget.getMethod()).readSet);
+            }
+          }
+        }
+        callSites.add(invokeInstruction.getCallSite());
+      } else if(ssaInstruction instanceof SSAGetInstruction){
+        IField iField = this.getInstructionField((SSAFieldAccessInstruction) ssaInstruction);
+        updateSet(reads, method, readSet, instructionIndex, iField);
+      }
+    }
+  }
+
+  /* ############################ ESCAPING INFO ANALYSIS ############################ */
+  /*
+   * TODO: The following three methods implement the escaping analysis, they are, however, almost
+   * code clones of the previous three methods and it is *highly* recommended to find a away
+   * to refactor them out of here.
+   */
+  
+  private void findEscapingInfo(IMethod method, int sourceLine, CallGraph cg,
+                                Set<AccessInfo> writes, Set<CallSiteReference> callSites){
+    AbstractInterproceduralCFG<ISSABasicBlock> interproceduralCFG = new InterproceduralCFG(cg);
+
+    List<ISSABasicBlock> initialBlocks = this.getBasicBlocksForSourceLine(method, sourceLine);
+
+    Set<CGNode> cgNodes = cg.getNodes(method.getReference());
+    if(cgNodes.size() > 0){
+      for (CGNode cgNode : cgNodes) { 
+        ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = interproceduralCFG.getCFG(cgNode);
+        doEscapingInfoAnalysis(cg, writes, callSites, initialBlocks, cgNode.getMethod(), cgNode, cfg);
+      }
+    } else {
+      // Oddly our method has no corresponding node in the callgraph.
+      ControlFlowGraph<SSAInstruction, ISSABasicBlock> cfg = cache.getIR(method).getControlFlowGraph();
+      doEscapingInfoAnalysis(cg, writes, callSites, initialBlocks, method, null, cfg);
+    }
+  }
+
+  private void doEscapingInfoAnalysis(CallGraph cg, Set<AccessInfo> writes,
+                                      Set<CallSiteReference> callSites,
+                                      List<ISSABasicBlock> initialBlocks,
+                                      IMethod method, CGNode cgNode,
+                                      ControlFlowGraph<SSAInstruction,
+                                      ISSABasicBlock> cfg) {
+    Queue<ISSABasicBlock> blocksWorkList = new LinkedList<ISSABasicBlock>(initialBlocks);
+    Set<ISSABasicBlock> visitedBlocks = new HashSet<ISSABasicBlock>();
+    while(!blocksWorkList.isEmpty()){
+      ISSABasicBlock block = blocksWorkList.poll();
+      visitEscapingBlock(block, method, cgNode, cg, writes, callSites);
+      visitedBlocks.add(block);
+      addToWorkList(cfg.getSuccNodes(block), blocksWorkList, visitedBlocks);
+    }
+  }
+
+  private void visitEscapingBlock(ISSABasicBlock block, IMethod method, CGNode methodNode,
+                                    CallGraph cg, Set<AccessInfo> writes,
+                                    Set<CallSiteReference> callSites) {
+    RWSet methodRWSet = rwSets.get(method);
+    Set<AccessInfo> writeSet = methodRWSet.writeSet;
+
+    Set<IMethod> methods = this.rwSets.keySet();
+    int instructionIndex = block.getFirstInstructionIndex();
+    Iterator<SSAInstruction> blockIterator = block.iterator();
+    while (blockIterator.hasNext()) {
+      SSAInstruction ssaInstruction = (SSAInstruction) blockIterator.next();
+      instructionIndex++;
+      if(ssaInstruction == null){
+        continue;
+      }
+      if(ssaInstruction instanceof SSAInvokeInstruction){
+        SSAInvokeInstruction invokeInstruction = (SSAInvokeInstruction) ssaInstruction;
+        if(methodNode != null){
+          for (CGNode possibleTarget : cg.getPossibleTargets(methodNode, invokeInstruction.getCallSite())) {
+            if (methods.contains(possibleTarget.getMethod())) {
+              writes.addAll(rwSets.get(possibleTarget.getMethod()).writeSet);
+            }
+          }
+        }
+        callSites.add(invokeInstruction.getCallSite());
+      } else if(ssaInstruction instanceof SSAPutInstruction){
+        IField iField = getInstructionField((SSAPutInstruction) ssaInstruction);
+        updateSet(writes, method, writeSet, instructionIndex, iField);
+      } else if(ssaInstruction instanceof SSAArrayStoreInstruction){
+        SSAArrayStoreInstruction storeInstruction = (SSAArrayStoreInstruction) ssaInstruction;
+        DefUse defUse = cache.getDefUse(cache.getIR(method));
+        int numberOfUses = storeInstruction.getNumberOfUses();
+        
+         /*We are only following the definitions-uses through one level to detect array field reads that
+         may be used solely to store elements in the array itself, i.e., in SSA form a field array
+         store command such as "x.a[1] = 10;" is implemented using two instructions, one that defines
+         a variable through a SSAGetInstruction and another that executes an SSAArrayStoreInstruction
+         on the previously defined variable.*/
+        for (int i = 0; i < numberOfUses; i++) {
+          int use = storeInstruction.getUse(i);
+          SSAInstruction def = defUse.getDef(use);
+          if(def != null && def instanceof SSAGetInstruction){
+            int currentNumberOfWrites = writes.size();
+            updateSet(writes, method, writeSet, instructionIndex,
+                       this.getInstructionField((SSAFieldAccessInstruction) def));
+            if(writes.size() > currentNumberOfWrites){
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* ############################ END OF ESCAPING INFO ANALYSIS ############################ */
+  
+  /**
+   * Returns the IField for the {@link FieldReference} contained in instruction <code>fieldAccessInstruction</code>.
+   * @param fieldAccessInstruction
+   * @return
+   */
+  private IField getInstructionField(SSAFieldAccessInstruction fieldAccessInstruction) {
+    FieldReference fieldReference = fieldAccessInstruction.getDeclaredField();
+    IClass iClass = getCHA().lookupClass(fieldReference.getDeclaringClass());
+    IField iField = iClass.getField(fieldReference.getName());
+    return iField;
+  }
+
+  /**
+   * Updates the {@link AccessInfo} set <code>accessInfoTarget</code> by adding AccessInfo objects from
+   * <code>accessInfosSource</code> if they have the same source line number as the instruction in
+   * index <code>instructionIndex</code> <b>and</b> if their <code>iField</code> attribute equals
+   * the <code>iField</code> parameter.
+   * @param accessInfoTarget
+   * @param method
+   * @param accessInfosSource
+   * @param instructionIndex
+   * @param iField
+   */
+  private void updateSet(Set<AccessInfo> accessInfoTarget, IMethod method,
+      Set<AccessInfo> accessInfosSource, int instructionIndex, IField iField) {
+    int sourceLine = getSourceLine((IBytecodeMethod) method, instructionIndex);
+    for (AccessInfo accessInfo : accessInfosSource) {
+      if(sourceLine == accessInfo.accessLineNumber && accessInfo.iField.equals(iField)){
+       accessInfoTarget.add(accessInfo);
+      }
+    }
+  }
+
+  /**
+   * Add all basic blocks of <code>nodes</code> to <code>blocksWorkList</code> that
+   * haven't been visited before.
+   * @param blocksWorkList queue of basic blocks to which the predecessors may be added
+   * @param visitedBlocks list of basic blocks that have already been visited and that should not
+   * be added to <code>blocksWorkList</code> again
+   * @param nodes
+   */
+  private void addToWorkList(
+      Iterator<ISSABasicBlock> nodes,
+      Queue<ISSABasicBlock> blocksWorkList, Set<ISSABasicBlock> visitedBlocks) {
+    while (nodes.hasNext()) {
+      ISSABasicBlock issaBasicBlock = nodes.next();
+      if(!visitedBlocks.contains(issaBasicBlock)){
+        blocksWorkList.add(issaBasicBlock);
+      }
+    }
+  }
+
+  /**
+   * Returns the SSA basic blocks that make up source line <code>sourceLine</code>.
+   * @param method the method that contains the source line indicated by <code>sourceLine</code>,
+   * it <b>must</b> also be an instance of {@link IBytecodeMethod}
+   * @param sourceLine the source line to get the basic blocks for
+   * @return a list containing the basic blocks that may compose <code>sourceLine</code>
+   */
+  private List<ISSABasicBlock> getBasicBlocksForSourceLine(IMethod method, int sourceLine){
+    List<ISSABasicBlock> ssaBasicBlocks = new ArrayList<ISSABasicBlock>();
+    IR ir = cache.getIRFactory().makeIR(method, Everywhere.EVERYWHERE, options.getSSAOptions());
+    SSAInstruction[] instructions = ir.getInstructions();
+    for (int i = 0; i < instructions.length; i++) {
+      SSAInstruction ssaInstruction = instructions[i];
+      if(ssaInstruction == null){
+        continue;
+      }
+      if(getSourceLine((IBytecodeMethod) method, i) == sourceLine){
+        ISSABasicBlock basicBlock = ir.getBasicBlockForInstruction(ssaInstruction);
+        if(!ssaBasicBlocks.contains(basicBlock)){
+          ssaBasicBlocks.add(basicBlock);
+        }
+      }
+    }
+    return ssaBasicBlocks;
+  }
+
+  /**
+   * Returns the source line for the instruction at index <code>instructionIndex</code> in method
+   * <code>bMethod</code>.
+   * If unable to determine the source line number this method returns -1. 
+   * @param bMethod method to determine the line number
+   * @param instructionIndex
+   * @return the source line number for instruction at index <code>instructionIndex</code> in method
+   * <code>bMethod</code> or -1 if unable to determine the source line number.
+   */
+  private int getSourceLine(IBytecodeMethod bMethod, int instructionIndex){
+    int sourceLineNum = -1;
+    try {
+      sourceLineNum = bMethod.getLineNumber(bMethod.getBytecodeIndex(instructionIndex));
+    } catch (InvalidClassFileException e) {
+      e.printStackTrace();
+    }
+    return sourceLineNum;
+  }
+
+  private <T> Set<T> toSet(Iterator<T> tIterator){
+    Set<T> tSet = new HashSet<T>();
+    while (tIterator.hasNext()) {
+      T cgNode = tIterator.next();
+      tSet.add(cgNode);
+    }
+    return tSet;
   }
 
 }

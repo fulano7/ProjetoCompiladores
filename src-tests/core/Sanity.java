@@ -187,4 +187,51 @@ public class Sanity {
     
   }
 
+  @Test
+  public void testFlowSensitivity() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
+    String strCompUnit = USER_DIR + SEP + "src-examples/foo/FooFlowSensitivity.java";
+        
+    String USER_DIR1 = System.getProperty("user.dir");
+    String SEP1 = System.getProperty("file.separator");
+    // default values
+    String exclusionFile = USER_DIR1 + SEP1 + "dat" + SEP1
+        + "ExclusionAllJava.txt";
+    String exclusionFileForCallGraph = USER_DIR1 + SEP1 + "dat" + SEP1
+        + "exclusionFileForCallGraph";
+    String dotPath = "/usr/bin/dot";
+    
+    Assert.assertTrue((new File(strCompUnit)).exists());
+    
+    String targetClass = "Lfoo/FooFlowSensitivity";
+    String targetMethod = "read()V";
+    
+    
+    String[] args = new String[] { "-appJar=" + "foo.jar",
+        "-printWalaWarnings=" + false, "-exclusionFile=" + exclusionFile,
+        "-exclusionFileForCallGraph=" + exclusionFileForCallGraph,
+        "-dotPath=" + dotPath, "-appPrefix=" + "foo",
+        "-listAppClasses=" + false, "-listAllClasses=" + false,
+        "-listAppMethods=" + false, "-genCallGraph=" + false,
+        "-measureTime=" + false, "-reportType=" + "dot",
+        "-targetClass=" + targetClass, "-targetMethod=" + targetMethod,
+        "-targetLine=13"};
+    // reading and saving command-line properties
+    Properties p = CommandLine.parse(args);
+    Util.setProperties(p);
+    
+    // clearing warnings from WALA
+    Warnings.clear();
+    
+    MethodDependencyAnalysis mda = new MethodDependencyAnalysis(p);
+    
+    // find informed class    
+    IClass clazz = depend.Main.findClass(mda);
+    //  find informed method
+    IMethod method = depend.Main.findMethod(clazz);
+    SimpleGraph sg = depend.Main.run(mda, method);
+    
+    String expectedResultFile = USER_DIR + SEP + "src-tests/core/Sanity.testFlowSensitivity.data";
+    
+    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
+  }
 }
