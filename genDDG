@@ -34,7 +34,7 @@ case "$1" in
 esac
 
 ## call java depend.Main
-java -cp ".:bin:libs/wala-r3501-slice.jar" \
+java -cp ".:bin:libs/wala-r3501-slice.jar:$CLASSPATH" \
     depend.Main \
     -appJar=${JARFILE} \
     -printWalaWarnings=false \
