@@ -12,4 +12,10 @@ public class FooCollections {
   void write() {
     t.add("Hello");
   }
+  void read2() {
+    System.out.println(s.size());
+  }
+  void write2() {
+    s.add("Hello");
+  }
 }
