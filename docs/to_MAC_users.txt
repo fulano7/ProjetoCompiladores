@@ -1,9 +1,6 @@
-This file contains additional information for the setup of this
-project to MAC users.  Please, update this file if you find additional
-requirements.
+Additional info to MAC users...
 
-1) Update the property "java_runtime_dir" on
-<root>/dat/wala.properties.
-  
-  Note the comment at the top of the declaration of this property
-  showing the (possible) location of the java runtime for MACOS.
+- Update the property "java_runtime_dir" on file
+  <rootdir>/dat/wala.properties to point to your jre installation,
+  which is certainly under "/Library/Java/JavaVirtualMachines/"
+  (please check).

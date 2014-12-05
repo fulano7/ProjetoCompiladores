@@ -1,0 +1,32 @@
+Use the following commands to try it out:
+
+$> ./build
+$> ./run
+
+This will show method dependencies across a sample set of cases that
+can be found under the folder "src/examples".  The script "build"
+compiles the source code and generates a .jar file containing the
+application under analysis (currently, those under "src/examples").
+Our implementation requires the subject to be packaged this way.  Open
+the script "run" to find the arguments that the main class
+"depend.Main" takes on input.
+
+
+Important details:
+
+There are some issues related to the use of WALA in Java versions
+>1.7.  In case, you use *nix and you have a version of the JDK prior
+to 1.7, please, set your environment to use it with the following
+commands.  You will be prompted with a question for which version of
+the Java JVM you want to use.
+
+Set the JVM version:
+
+$> sudo update-alternatives --config java
+
+And do the same for the Java compiler:
+
+$> sudo update-alternatives --config javac
+
+enjoy,
+ -Marcelo

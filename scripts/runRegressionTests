@@ -1,0 +1,13 @@
+#!/bin/bash
+
+## this is the name of the project directory.
+CURRDIR="$(X=`pwd` && find $X -name "common" | sed "s/common//").."
+
+## load variable definitions to help scripts (e.g., CLASSPATH, BINDIR, etc.)
+source ${CURRDIR}/scripts/common
+
+## make sure you build first
+${CURRDIR}/scripts/build
+
+## run regression tests
+java -cp $CLASSPATH AllTests

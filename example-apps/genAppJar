@@ -1,0 +1,42 @@
+#!/bin/bash
+
+## this is the name of the project directory.
+## this is the name of the project directory.
+CURRDIR="$(X=`pwd` && find $X -name "common" | sed "s/common//").."
+HERE="${CURRDIR}/example-apps" 
+BINDIR="${CURRDIR}/bin"
+
+## add your app here 
+case "$1" in
+    "101" ) 
+	PREFIX="companies101"
+	NAME="$1"
+        CP="" 
+	;;
+    "coffee" ) 
+	PREFIX="coffeemaker"
+	NAME="$1"
+        CP="" 
+	;;
+    "foo" ) 
+	PREFIX="foo"
+	NAME="foo"
+        CP="" 
+	;;
+    * ) 
+	echo "please inform the name of the subject "
+	exit;
+esac
+
+######################  generate jar file for application
+
+(cd ${HERE}/src/;
+    ## compile into BINDIR
+    find "${PREFIX}" -name "*.java" | xargs javac -cp "${CP}"
+    ## create jar file
+    find "${PREFIX}" -name "*.class" | xargs jar cvf ${NAME}.jar
+    ## move jar file
+    mv ${NAME}.jar ..
+    ## delete class files
+    find "${PREFIX}" -name "*.class" | xargs rm
+)
