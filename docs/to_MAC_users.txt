@@ -1,6 +1,0 @@
-Additional info to MAC users...
-
-- Update the property "java_runtime_dir" on file
-  <rootdir>/dat/wala.properties to point to your jre installation,
-  which is certainly under "/Library/Java/JavaVirtualMachines/"
-  (please check).
