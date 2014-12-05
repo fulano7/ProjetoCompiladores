@@ -1,10 +1,10 @@
-package core;
+package rwsets;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
 
 public class Helper {
   
@@ -21,5 +21,4 @@ public class Helper {
     fr.close();
     return sb.toString();
   }
-
 }
