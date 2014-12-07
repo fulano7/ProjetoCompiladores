@@ -10,4 +10,4 @@ source ${CURRDIR}/scripts/common
 ${CURRDIR}/scripts/build
 
 ## run regression tests
-java -cp $CLASSPATH AllTests
+java -cp $CLASSPATH junit.textui.TestRunner rwsets.AllTests
