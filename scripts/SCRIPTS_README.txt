@@ -1,5 +1,6 @@
 This documents lists and shortly describes the scripts in this
-directory.  The list in alphabetical order:
+directory. All of them must be executed from this directory.
+The list in alphabetical order:
 
  build
  common
