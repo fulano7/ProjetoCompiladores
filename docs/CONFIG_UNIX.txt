@@ -12,3 +12,9 @@ Similar to the Java compiler:
 
 $> sudo update-alternatives --config javac
 
+=========== wala.properties ============
+
+Update the property "java_runtime_dir" on file
+<rootdir>/dat/wala.properties to point to your jre installation.  
+
+
