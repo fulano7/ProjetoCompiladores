@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import com.ibm.wala.util.strings.Atom;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
@@ -78,9 +79,9 @@ public class Util {
   }
 
   public static boolean isAppClass(IClass klass) {
-    //  return classLoader.getName().toString().equals("Application");
-    String pack = klass.getName().getPackage().toString();
-    return pack.startsWith(APP_PREFIX);
+    //  return classLoader.getName().toString().equals("Application"); 
+    Atom pack = klass.getName().getPackage();
+    return pack != null ? pack.toString().startsWith(APP_PREFIX) : false;
   }
   
   public static void setProperties(Properties _props) {

@@ -9,5 +9,11 @@ source ${CURRDIR}/scripts/common
 ## make sure you build first
 ${CURRDIR}/scripts/build
 
+## go to the project root
+cd ..
+
 ## run regression tests
-java -cp $CLASSPATH junit.textui.TestRunner rwsets.AllTests
+java -cp $CLASSPATH org.junit.runner.JUnitCore rwsets.AllTests 
+
+## go back
+cd scripts
