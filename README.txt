@@ -40,7 +40,13 @@ docs/TRY.txt - info on how to use the system from the command line
 
 - Unpredictable results for JDK different than 1.7
 - Command-line script only handle unix and macos installations
-- ./script/runRegressionTests breaks on macos (mab@cin is working on this)
+- ./scripts/runRegressionTests breaks 
+  (mab@cin is working on this)
+- 2 tests are ignored 
+  (mab@cin is working on this)
 
-enjoy,
- -Marcelo
+=========================================
+
+> Questions
+
+if688-l@cin.ufpe.br
