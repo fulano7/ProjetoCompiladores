@@ -1,6 +1,8 @@
-=== Read-Write Sets Implementation ===
+Read-Write Sets Implementation
+==============================
 
-> Directories
+Directories
+-----------
 
 ```bin``` - build files (e.g., class files) <br/>
 ```code``` - instrumentation - ignore <br/>
@@ -13,9 +15,8 @@
 ```src``` - source of the read-writes set implementation <br/>
 ```src-tests``` - source of test cases
 
-=========================================
-
-> Configuration
+Configuration
+-------------
 
 Please follow configuration instructions in the following files for
 your setup.
@@ -26,16 +27,14 @@ setup information can be found at docs/CONFIG_MAC, docs/CONFIG_UNIX and docs/CON
 Please use JDK 1.7.  We apologize for this inconvenience, we should
 address this limitation in the future.
 
-=========================================
-
-> Documentation
+Documentation
+-------------
  
 docs/RWSETS.txt - summarized explanation of the read-write sets algo
 docs/TRY.txt - info on how to use the system from the command line
 
-=========================================
-
-> Known issues
+Known issues
+------------
 
 - Unpredictable results for JDK different than 1.7
 - Command-line script only handle ```Unix``` and ```Mac OS``` installations. Run scripts on Windows requires [Cygwin](https://www.cygwin.com) installed.
@@ -44,8 +43,7 @@ docs/TRY.txt - info on how to use the system from the command line
 - 2 tests are ignored 
   (mab@cin is working on this)
 
-=========================================
-
-> Questions
+Questions
+---------
 
 if688-l@cin.ufpe.br
