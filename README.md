@@ -36,12 +36,13 @@ Documentation
 Known issues
 ------------
 
-- Unpredictable results for JDK different than 1.7
-- Command-line script only handle ```Unix``` and ```Mac OS``` installations. Run scripts on Windows requires [Cygwin](https://www.cygwin.com) installed.
+- Unpredictable results for ```JDK``` different than ```1.7```
+- Doesn't provide support for ```implements``` clause
+- Command-line script only handle ```Unix``` and ```Mac OS``` installations. Run scripts on Windows requires [Cygwin](https://www.cygwin.com) installed
 - ./scripts/runRegressionTests breaks 
-  (mab@cin is working on this)
+  (mab@cin.ufpe.br is working on this)
 - 2 tests are ignored 
-  (mab@cin is working on this)
+  (mab@cin.ufpe.br is working on this)
 
 Questions
 ---------
