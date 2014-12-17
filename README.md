@@ -22,16 +22,16 @@ Please follow configuration instructions in the following files for
 your setup.
 
 Please choose either ```Mac OS```, ```Unix``` or ```Windows```, if you want our support. Detailed
-setup information can be found at docs/CONFIG_MAC, docs/CONFIG_UNIX and docs/CONFIG_WINDOWS.
+setup information can be found at ```docs/CONFIG_MAC```, ```docs/CONFIG_UNIX``` and ```docs/CONFIG_WINDOWS```.
 
-Please use JDK 1.7.  We apologize for this inconvenience, we should
+Please use ```JDK 1.7```.  We apologize for this inconvenience, we should
 address this limitation in the future.
 
 Documentation
 -------------
  
-docs/RWSETS.txt - summarized explanation of the read-write sets algo
-docs/TRY.txt - info on how to use the system from the command line
+```docs/RWSETS.txt``` - summarized explanation of the read-write sets algo
+```docs/TRY.txt``` - info on how to use the system from the command line
 
 Known issues
 ------------
