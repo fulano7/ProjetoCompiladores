@@ -2,15 +2,15 @@
 
 > Directories
 
-```bin``` - build files (e.g., class files)
-```code``` - instrumentation - ignore
-```dat``` - resources (e.g., xml and txt configuration files)
-```docs``` - some documentation 
-```example-apps``` - sample applications to demo this project  
-```libs``` - java libraries (.jar files)
-```results``` - temporary directory to store execution-generated files
-```scripts``` - script to use the system
-```src``` - source of the read-writes set implementation
+```bin``` - build files (e.g., class files) <br/>
+```code``` - instrumentation - ignore <br/>
+```dat``` - resources (e.g., .xml and .txt configuration files) <br/>
+```docs``` - some documentation <br/>
+```example-apps``` - sample applications to demo this project <br/>
+```libs``` - java libraries (.jar files) <br/>
+```results``` - temporary directory to store execution-generated files <br/>
+```scripts``` - script to use the system <br/>
+```src``` - source of the read-writes set implementation <br/>
 ```src-tests``` - source of test cases
 
 =========================================
