@@ -140,7 +140,7 @@ public class Main {
     String[] lineAndClass = 
         depend.util.parser.Util.getLineAndWALAClassName(targetLineContents+"", strCompUnit);
     int targetLine = Integer.parseInt(lineAndClass[0]);
-    String targetClass = lineAndClass[1];    
+    String targetClass = lineAndClass[1].replace(".", "/");    
     
     String USER_DIR = System.getProperty("user.dir");
     String SEP = System.getProperty("file.separator");
