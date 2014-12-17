@@ -53,24 +53,30 @@ public class TestProjetoIP {
   public void test0(){
     
     String line = "if (pedidos[i].getCodigo() == pedido.getCodigo()) {";
-    String compUnitFile = APPS_SRC_DIR+"/Projeto_IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+    String compUnitFile = APPS_SRC_DIR+"/Projeto_IP/src/br/ufpe/cin/dados/RepositorioPedidosArray.java";
     String filter = "br.ufpe.cin";
     
     Assert.assertTrue((new File(compUnitFile)).exists());
     Assert.assertTrue((new File(JAR_FILE)).exists());
     
+    boolean b = true;
+    
     try{
-      
       SimpleGraph sgTest0 = depend.Main.analyze(JAR_FILE, filter, compUnitFile, line);
-      String expectedResultFile = TEST_DIR + "/rwsets/coffeemaker/TestCoffeeMaker.test0.data";
+      String expectedResultFile = TEST_DIR + "/rwsets/projetoip/TestProjetoIP.test0.data";
       
       Assert.assertEquals(Helper.readFile(expectedResultFile), sgTest0.toDotString());
-      
     } catch (Exception e){
+      b = false;
       e.printStackTrace();
+    } finally{
+      Assert.assertTrue(b);
     }
   }
   
-  
+  @Test
+  public void testRemoverPedido(){
+    // TODO this method
+  }
   
 }
