@@ -5,7 +5,8 @@ import java.util.Iterator;
 import br.ufpe.cin.exception.PedidoNaoExistenteException;
 import br.ufpe.cin.restaurante.Pedido;
 
-public class RepositorioPedidosArray{
+public class RepositorioPedidosArray {
+  //  implements IRepositorio<Pedido>
 	private Pedido[] pedidos;
 	private int indice;
 

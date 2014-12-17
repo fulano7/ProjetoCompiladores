@@ -140,7 +140,7 @@ public class Main {
     String[] lineAndClass = 
         depend.util.parser.Util.getLineAndWALAClassName(targetLineContents+"", strCompUnit);
     int targetLine = Integer.parseInt(lineAndClass[0]);
-    String targetClass = lineAndClass[1];    
+    String targetClass = lineAndClass[1].replace(".", "/");    
     
     String USER_DIR = System.getProperty("user.dir");
     String SEP = System.getProperty("file.separator");
@@ -148,7 +148,8 @@ public class Main {
     // default values
     String exclusionFile = USER_DIR + SEP + "dat" + SEP + "ExclusionAllJava.txt";
     String exclusionFileForCallGraph = USER_DIR + SEP + "dat" + SEP + "exclusionFileForCallGraph";
-    String dotPath = "/usr/bin/dot";
+    String dotPath = "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
+    // in linux: "/usr/bin/dot"
     
     String[] args = new String[] {
         "-appJar="+appJar, 
