@@ -102,7 +102,7 @@ public class Util {
     StringBuffer sb = new StringBuffer();
     sb.append("L");
     if (pd != null) {
-      sb.append(pd.getName());
+      sb.append(pd.getName().toString().replaceAll("\\.", "/"));
       sb.append("/");
     }
     for (int i = 0; i < stack.size(); i++) {
@@ -112,6 +112,7 @@ public class Util {
         sb.append("$");
       }
     }
+
     return sb.toString();
   }
 
