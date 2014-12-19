@@ -8,7 +8,10 @@ import org.junit.runners.Suite;
   // Add test classes here
   rwsets.coffeemaker.TestCoffeeMaker.class,
   rwsets.core.Sanity.class,
-  rwsets.projetoip.TestProjetoIP.class
+  rwsets.projetoip.TestProjetoIP.class,
+  rwsets.projetoipempacotado.TestProjetoIPEmpacotado.class,
+  rwsets.projetopg.Test_PG_Projeto_2_Jar.class,
+  rwsets.projetogdi.TestProjetoGDI.class
 })
 
 public class AllTests  { }
