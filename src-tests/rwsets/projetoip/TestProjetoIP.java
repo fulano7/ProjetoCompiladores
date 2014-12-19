@@ -2,32 +2,19 @@ package rwsets.projetoip;
 
 import japa.parser.ParseException;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
-
+import java.io.PrintWriter;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import rwsets.Helper;
 
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
-import com.ibm.wala.types.ClassLoaderReference;
-import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
-import com.ibm.wala.util.io.CommandLine;
-import com.ibm.wala.util.warnings.Warnings;
-
-import depend.MethodDependencyAnalysis;
-import depend.util.Util;
 import depend.util.graph.SimpleGraph;
 
 public class TestProjetoIP {
@@ -57,7 +44,7 @@ public class TestProjetoIP {
    * @throws InvalidClassFileException
    */
   @Test
-  public void test0() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
+  public void testPedidoGetPosicao() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
     
     String line = "if (pedidos[i].getCodigo() == pedido.getCodigo()) {";
     String compUnitFile = APPS_SRC_DIR+"/restaurante/RepositorioPedidosArray.java";
@@ -66,24 +53,48 @@ public class TestProjetoIP {
     Assert.assertTrue((new File(compUnitFile)).exists());
     Assert.assertTrue((new File(JAR_FILE)).exists());
     
-    try{
     SimpleGraph sgTest0 = depend.Main.analyze(JAR_FILE, filter, compUnitFile,line);
-    String expectedResultFile = TEST_DIR + "/rwsets/projetoip/TestProjetoIP.test0.data";
-    System.out.println(sgTest0.toDotString());
+    String expectedResultFile = TEST_DIR + "/rwsets/projetoip/TestProjetoIP.testPedidoGetPosicao.data";
+    
+    if(new File(expectedResultFile).createNewFile()){
+      PrintWriter pw = new PrintWriter(new FileWriter(expectedResultFile));
+      pw.print(sgTest0.toDotString());
+      pw.close();
+    }
 
-    //Assert.assertEquals(Helper.readFile(expectedResultFile),sgTest0.toDotString());
-    }catch(Exception e){
-          e.printStackTrace();
-        }
+    Assert.assertEquals(Helper.readFile(expectedResultFile),sgTest0.toDotString());
 
   }
   
   /**
    * Known issue: doesn't provide support for Java Interfaces.
+   * @throws InvalidClassFileException 
+   * @throws ParseException 
+   * @throws CancelException 
+   * @throws WalaException 
+   * @throws IOException 
    */
   @Test
-  public void testRemoverPedido(){
-    // TODO this method
+  public void testRemoverProduto() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
+    
+    String line = "public void remover(Produto produto)";
+    String compUnitFile = APPS_SRC_DIR+"/restaurante/RepositorioProdutosArray.java";
+    String filter = "restaurante";
+    
+    Assert.assertTrue((new File(compUnitFile)).exists());
+    Assert.assertTrue((new File(JAR_FILE)).exists());
+    
+    SimpleGraph sgTest0 = depend.Main.analyze(JAR_FILE, filter, compUnitFile,line);
+    String expectedResultFile = TEST_DIR + "/rwsets/projetoip/TestProjetoIP.testRemoverProduto.data";
+    
+    if(new File(expectedResultFile).createNewFile()){
+      PrintWriter pw = new PrintWriter(new FileWriter(expectedResultFile));
+      pw.print(sgTest0.toDotString());
+      pw.close();
+    }
+
+    Assert.assertEquals(Helper.readFile(expectedResultFile),sgTest0.toDotString());
+    
   }
   
   

@@ -6,24 +6,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Properties;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import rwsets.Helper;
 
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
-import com.ibm.wala.util.io.CommandLine;
-import com.ibm.wala.util.warnings.Warnings;
-
-import depend.MethodDependencyAnalysis;
-import depend.util.Util;
 import depend.util.graph.SimpleGraph;
 
 public class TestProjetoIPEmpacotado {
@@ -54,7 +45,7 @@ public class TestProjetoIPEmpacotado {
    * @throws InvalidClassFileException
    */
   @Test
-  public void test0() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
+  public void testPedidoGetPosicao() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
     
     String line = "if (pedidos[i].getCodigo() == pedido.getCodigo()) {";
     String compUnitFile = APPS_SRC_DIR+"/br/ufpe/cin/dados/RepositorioPedidosArray.java";
@@ -64,7 +55,7 @@ public class TestProjetoIPEmpacotado {
     Assert.assertTrue((new File(JAR_FILE)).exists());
     
     SimpleGraph sgTest0 = depend.Main.analyze(JAR_FILE, filter, compUnitFile,line);
-    String expectedResultFile = TEST_DIR + "/rwsets/projetoipempacotado/TestProjetoIPEmpacotado.test0.data";
+    String expectedResultFile = TEST_DIR + "/rwsets/projetoipempacotado/TestProjetoIPEmpacotado.testPedidoGetPosicao.data";
     
     if(new File(expectedResultFile).createNewFile()){
       PrintWriter pw = new PrintWriter(new FileWriter(expectedResultFile));
@@ -76,61 +67,4 @@ public class TestProjetoIPEmpacotado {
 
   }
   
-  @Test
-  public void testAnalysisWithLineContents() throws Exception {
-    String compilationUnit = APPS_SRC_DIR+"/br/ufpe/cin/dados/RepositorioPedidosArray.java";
-    String exclusionFile = RESOURCES_DIR + "/ExclusionAllJava.txt";
-    String exclusionFileForCallGraph = RESOURCES_DIR + "/ExclusionForCallGraph.txt";
-    String applicationJar = APPS_JAR_DIR + "/projetoipempacotado.jar";
-    String targetClass = "Lbr/ufpe/cin/dados/RepositorioProdutosArray";
-    String targetMethod = "inserir(Lbr/ufpe/cin/restaurante/Produto;)V";
-    String line = "this.pedidos[indice] = pedido;";
-    String filter = "br/ufpe/cin";
-    
-    String[] lineAndClass = depend.util.parser.Util.getLineAndWALAClassName(line, compilationUnit);
-    
-    int targetLine = Integer.parseInt(lineAndClass[0]);
-
-    // checks
-    Assert.assertTrue((new File(compilationUnit)).exists());
-    Assert.assertTrue((new File(exclusionFile)).exists());
-    Assert.assertTrue((new File(exclusionFileForCallGraph)).exists());
-    Assert.assertTrue((new File(applicationJar)).exists());
-
-    String[] args = new String[] { 
-        "-appJar=" + applicationJar,
-        "-printWalaWarnings=" + false, 
-        "-exclusionFile=" + exclusionFile,
-        "-exclusionFileForCallGraph=" + exclusionFileForCallGraph,
-        "-dotPath=" + "/usr/bin/dot", 
-        "-appPrefix=" + filter,
-        "-listAppClasses=" + false, 
-        "-listAllClasses=" + false,
-        "-listAppMethods=" + false, 
-        "-genCallGraph=" + false,
-        "-measureTime=" + false, 
-        "-reportType=" + "list",
-        "-targetClass=" + targetClass, 
-        "-targetMethod=" + targetMethod,
-        "-targetLine=" + targetLine};
-    
-    // reading and saving command-line properties
-    Properties p = CommandLine.parse(args);
-    Util.setProperties(p);
-
-    // clearing warnings from WALA
-    Warnings.clear();
-
-    MethodDependencyAnalysis mda = new MethodDependencyAnalysis(p);
-
-    // find informed class    
-    IClass clazz = depend.Main.findClass(mda);
-    //  find informed method
-    IMethod method = depend.Main.findMethod(clazz);
-    SimpleGraph sg = depend.Main.run(mda, method);
-    
-    System.out.println(sg == null ? "" : sg.toDotString());
-    //String expectedResultFile = TEST_DIR + SEP + "rwsets/coffeemaker/TestCoffeeMaker.testAnalysisWithLineContents.data";
-    //Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toString());
-  }
 }
