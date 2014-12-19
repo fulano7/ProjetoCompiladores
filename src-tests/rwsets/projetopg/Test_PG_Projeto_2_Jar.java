@@ -42,7 +42,7 @@ public class Test_PG_Projeto_2_Jar {
     Assert.assertTrue((new File(strCompUnit)).exists());
     Assert.assertTrue((new File(PG_Projeto_2_Jar)).exists());
     
-    String line = "if(addRecipe(newRecipe)) {";
+    String line = "luz = leitura_luz(iluninacaoParam);";
     SimpleGraph sg = depend.Main.analyze(PG_Projeto_2_Jar, "PG", strCompUnit, line);
         
     String expectedResultFile = TEST_DIR + SEP + "rwsets/PG_Projeto_2/Test_PG_Projeto_2.test0.data";
