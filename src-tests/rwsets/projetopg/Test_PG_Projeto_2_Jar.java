@@ -1,103 +1,76 @@
 package rwsets.projetopg;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static rwsets.Helper.CLASS_NOT_FOUND;
+import static rwsets.Helper.EXCLUSION_FILE;
+import static rwsets.Helper.EXCLUSION_FILE_FOR_CALLGRAPH;
+import static rwsets.Helper.USER_DIR;
+import static rwsets.Helper.getExpectedResultsFilePath;
+import static rwsets.Helper.readFile;
 import japa.parser.ParseException;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
+import java.io.PrintWriter;
 
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import rwsets.Helper;
-
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
-import com.ibm.wala.util.io.CommandLine;
-import com.ibm.wala.util.warnings.Warnings;
 
-import depend.MethodDependencyAnalysis;
-import depend.util.Util;
 import depend.util.graph.SimpleGraph;
 
 public class Test_PG_Projeto_2_Jar {
-  
-  String USER_DIR = System.getProperty("user.dir");
-  String SEP = System.getProperty("file.separator");
-  String EXAMPLES = USER_DIR + SEP + "example-apps";
-  String TEST_DIR = USER_DIR + SEP + "src-tests";
-  String EXAMPLES_SRC = EXAMPLES +  SEP + "src";
-  String EXAMPLES_JAR = EXAMPLES; 
-  String RESOURCES_DIR = USER_DIR + SEP + "dat";
+  private static final String APPS_DIR = USER_DIR + "/example-apps";
+  private static final String APPS_JAR_DIR = APPS_DIR;
+  private static final String APPS_SRC_DIR = APPS_DIR + "/src";
+  private static final String JAR_FILE = APPS_JAR_DIR + "/PG_Projeto_2.jar";
+  private static final String PACKAGE_FILTER = "";
 
-  @Test
-  public void test0() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-
-    String strCompUnit = EXAMPLES_SRC + SEP + "PG_Projeto_2/src/Core.java"; //obs com src
-    String PG_Projeto_2_Jar = EXAMPLES_JAR + SEP + "PG_Projeto_2.jar";
-    
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    Assert.assertTrue((new File(PG_Projeto_2_Jar)).exists());
-    
-    String line = "luz = leitura_luz(iluninacaoParam);";
-    SimpleGraph sg = depend.Main.analyze(PG_Projeto_2_Jar, "PG", strCompUnit, line);
-        
-    String expectedResultFile = TEST_DIR + SEP + "rwsets/PG_Projeto_2/Test_PG_Projeto_2.test0.data";
-    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
+  @Before
+  public void setup() {
+    assertTrue(new File(JAR_FILE).exists());
+    assertTrue(new File(EXCLUSION_FILE).exists());
+    assertTrue(new File(EXCLUSION_FILE_FOR_CALLGRAPH).exists());
   }
 
+  private static SimpleGraph analyze(String classFilePath, String classFileLine) {
+    try {
+      return depend.Main.analyze(JAR_FILE, PACKAGE_FILTER, classFilePath, classFileLine);
+    } catch (IOException | WalaException | CancelException | ParseException | InvalidClassFileException e) {
+      return null;
+    }
+  }
+
+  /**
+   * KUnexpected result: can't find class 'Core'
+   * @throws IOException
+   * @throws WalaException
+   * @throws CancelException
+   * @throws ParseException
+   * @throws InvalidClassFileException
+   */
   @Test
-  public void testAnalysisWithLineContents() throws Exception {
-    String strCompUnit = EXAMPLES_SRC + SEP + "PG_Projeto_2/src/Core.java";
-    String exclusionFile = RESOURCES_DIR + SEP + "ExclusionAllJava.txt";
-    String exclusionFileForCallGraph = RESOURCES_DIR + SEP + "ExclusionForCallGraph.txt";
-    String PG_Projeto_2_Jar = EXAMPLES_JAR + SEP + "PG_Projeto_2.jar";
-    String targetClass = "LPG_Projeto_2/Core";
-    String targetMethod = "editRecipe(LPG_Projeto_2/Recipe;LPG_Projeto_2/Recipe;)Z";
+  public void test1() throws IOException {
+    String classFileLine = "luz = leitura_luz(iluninacaoParam);";
+    String classFilePath = APPS_SRC_DIR + "/PG_Projeto_2/src/Core.java";
 
-    // checks
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    Assert.assertTrue((new File(exclusionFile)).exists());
-    Assert.assertTrue((new File(exclusionFileForCallGraph)).exists());
-    Assert.assertTrue((new File(PG_Projeto_2_Jar)).exists());
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
 
-    String[] args = new String[] { 
-        "-appJar=" + PG_Projeto_2_Jar,
-        "-printWalaWarnings=" + false, 
-        "-exclusionFile=" + exclusionFile,
-        "-exclusionFileForCallGraph=" + exclusionFileForCallGraph,
-        "-dotPath=" + "/usr/bin/dot", 
-        "-appPrefix=" + "PG",
-        "-listAppClasses=" + false, 
-        "-listAllClasses=" + false,
-        "-listAppMethods=" + false, 
-        "-genCallGraph=" + false,
-        "-measureTime=" + false, 
-        "-reportType=" + "list",
-        "-targetClass=" + targetClass, 
-        "-targetMethod=" + targetMethod,
-        "-targetLine=99"};
-    
-    // reading and saving command-line properties
-    Properties p = CommandLine.parse(args);
-    Util.setProperties(p);
+    String expectedResultsFile = getExpectedResultsFilePath();
 
-    // clearing warnings from WALA
-    Warnings.clear();
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
 
-    MethodDependencyAnalysis mda = new MethodDependencyAnalysis(p);
-
-    // find informed class    
-    IClass clazz = depend.Main.findClass(mda);
-    //  find informed method
-    IMethod method = depend.Main.findMethod(clazz);
-    SimpleGraph sg = depend.Main.run(mda, method);
-    
-    String expectedResultFile = TEST_DIR + SEP + "rwsets/PG_Projeto_2/Test_PG_Projeto_2.testAnalysisWithLineContents.data";
-    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toString());
-  } 
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
 }
