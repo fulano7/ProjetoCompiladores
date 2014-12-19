@@ -94,7 +94,7 @@ public class TestProjetoIPEmpacotado {
 
   @Test
   public void test3() throws IOException {
-    String classFileLine = "Pedido retorno = null;";
+    String classFileLine = "return null;";
     String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
@@ -129,6 +129,25 @@ public class TestProjetoIPEmpacotado {
     assertTrue(new File(expectedResultsFile).exists());
     assertEquals(readFile(expectedResultsFile), graph.toDotString());
   }
+  
+  @Test
+  public void test5() throws IOException {
+    String classFileLine = "retorno = pedidos[i];";
+    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+
+    String expectedResultsFile = getExpectedResultsFilePath();
+
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
 
   @Test(expected = UnsupportedOperationException.class)
   /**
@@ -140,8 +159,38 @@ public class TestProjetoIPEmpacotado {
    * @throws ParseException
    * @throws InvalidClassFileException
    */
-  public void test5() throws IOException {
+  public void test6() throws IOException {
     String classFileLine = "if (produtos[i].getCodigo() == produto.getCodigo()) {";
+    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioProdutosArray.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+
+    String expectedResultsFile = getExpectedResultsFilePath();
+
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  @Test(expected = UnsupportedOperationException.class)
+  /**
+   * Known issue: doesn't provide support for 'implements' clause
+   * A exceção é originalmente lançada na linha 291 do método depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
+   * Com esse segundo teste para a mesma classe RepositorioProdutosArray é possível perceber que uma vez que a classe tenha
+   * a clásula 'implements', qualquer análise em seu código irá falhar
+   * @throws IOException
+   * @throws WalaException
+   * @throws CancelException
+   * @throws ParseException
+   * @throws InvalidClassFileException
+   */
+  public void test7() throws IOException {
+    String classFileLine = "retorno = produtos[i];";
     String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioProdutosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());

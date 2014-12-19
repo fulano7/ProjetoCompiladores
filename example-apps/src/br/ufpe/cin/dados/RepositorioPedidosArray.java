@@ -53,9 +53,7 @@ public class RepositorioPedidosArray {
 		return posicao;
 	}
 
-	@Override
 	public Iterator<Pedido> procurar(Pedido valor) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

@@ -37,6 +37,7 @@ Known issues
 ------------
 
 - Unpredictable results for ```JDK``` different than ```1.7```.
+- The directory where ```Java Runtime``` libraries are located is hardcoded in ```wala.properties```.
 - Doesn't provide support for ```implements``` clause.
 - Command-line script only handle ```Unix``` and ```Mac OS``` installations. Run scripts on Windows requires [Cygwin](https://www.cygwin.com) installed.
 - ./scripts/runRegressionTests breaks (mab@cin.ufpe.br is working on this).
