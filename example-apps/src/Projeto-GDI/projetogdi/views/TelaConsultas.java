@@ -1,4 +1,4 @@
-package views;
+package projetogdi.views;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;

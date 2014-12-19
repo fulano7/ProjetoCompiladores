@@ -1,11 +1,11 @@
-package views;
+package projetogdi.views;
 
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import models.Cliente;
-import controler.CadastroCliente;
+import projetogdi.models.Cliente;
+import projetogdi.controler.CadastroCliente;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;

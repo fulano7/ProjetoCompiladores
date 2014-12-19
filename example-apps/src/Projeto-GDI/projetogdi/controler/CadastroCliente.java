@@ -1,6 +1,6 @@
-package controler;
+package projetogdi.controler;
 
-import models.Cliente;
+import projetogdi.models.Cliente;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

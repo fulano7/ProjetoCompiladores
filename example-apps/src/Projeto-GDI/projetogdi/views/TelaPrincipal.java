@@ -1,8 +1,8 @@
-package views;
+package projetogdi.views;
 
 import java.awt.EventQueue;
-import views.TelaCadastro;
-import views.TelaConsultas;
+import projetogdi.views.TelaCadastro;
+import projetogdi.views.TelaConsultas;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;

@@ -31,7 +31,7 @@ public class TestProjetoGDI {
   private static final String APPS_SRC_DIR = APPS_DIR + "/src";
   private static final String JAR_FILE = APPS_JAR_DIR
       + "/projetoGDI.jar";
-  private static final String PACKAGE_FILTER = "";
+  private static final String PACKAGE_FILTER = "projetogdi";
 
   @Before
   public void setup() {
@@ -60,7 +60,7 @@ public class TestProjetoGDI {
       ParseException, InvalidClassFileException {
     String classFileLine = "TelaPrincipal frame = new TelaPrincipal();";
     String classFilePath = APPS_SRC_DIR
-        + "/Projeto-GDI/views/TelaPrincipal.java";
+        + "/Projeto-GDI/projetogdi/views/TelaPrincipal.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
@@ -73,7 +73,6 @@ public class TestProjetoGDI {
   }
   
   /**
-   * Unexpected result: throws null pointer exception
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
@@ -85,7 +84,7 @@ public class TestProjetoGDI {
       ParseException, InvalidClassFileException {
     String classFileLine = "initialize();";
     String classFilePath = APPS_SRC_DIR
-        + "/Projeto-GDI/views/TelaCadastro.java";
+        + "/Projeto-GDI/projetogdi/views/TelaCadastro.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
@@ -98,7 +97,6 @@ public class TestProjetoGDI {
   }
   
   /**
-   * Unexpected result: throws null pointer exception
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
@@ -110,7 +108,7 @@ public class TestProjetoGDI {
       ParseException, InvalidClassFileException {
     String classFileLine = "stmt.executeQuery(insercao);";
     String classFilePath = APPS_SRC_DIR
-        + "/Projeto-GDI/controler/CadastroCliente.java";
+        + "/Projeto-GDI/projetogdi/controler/CadastroCliente.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();

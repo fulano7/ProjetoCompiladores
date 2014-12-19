@@ -1,0 +1,14 @@
+digraph "DirectedGraph" {
+ graph [concentrate = true];
+ center=true;
+ fontsize=6;
+ node [ color=blue,shape="box"fontsize=6,fontcolor=black,fontname=Arial];
+ edge [ color=black,fontsize=6,fontcolor=black,fontname=Arial];
+"void projetogdi/controler/CadastroCliente.cadastrar(projetogdi/models/Cliente)"[color="red", fontsize="6", fontname="Arial"];
+"void projetogdi/controler/CadastroCliente.<clinit>()" -> "void projetogdi/controler/CadastroCliente.cadastrar(projetogdi/models/Cliente)" [label="java/lang/String projetogdi/controler/CadastroCliente.password : 13" ]
+"void projetogdi/controler/CadastroCliente.<clinit>()" -> "void projetogdi/controler/CadastroCliente.cadastrar(projetogdi/models/Cliente)" [label="java/lang/String projetogdi/controler/CadastroCliente.username : 12" ]
+"void projetogdi/models/Cliente.<init>(java/lang/String,java/lang/String,Ljava/lang/String,int)" -> "Ljava/lang/String projetogdi/models/Cliente.getTelefones()" [label="Ljava/lang/String projetogdi/models/Cliente.telefones : 12" ]
+"void projetogdi/models/Cliente.<init>(java/lang/String,java/lang/String,Ljava/lang/String,int)" -> "int projetogdi/models/Cliente.getIdProduto()" [label="int projetogdi/models/Cliente.idProduto : 13" ]
+"void projetogdi/models/Cliente.<init>(java/lang/String,java/lang/String,Ljava/lang/String,int)" -> "java/lang/String projetogdi/models/Cliente.getCpf()" [label="java/lang/String projetogdi/models/Cliente.cpf : 11" ]
+"void projetogdi/models/Cliente.<init>(java/lang/String,java/lang/String,Ljava/lang/String,int)" -> "java/lang/String projetogdi/models/Cliente.getNome()" [label="java/lang/String projetogdi/models/Cliente.nome : 10" ]
+}

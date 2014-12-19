@@ -1,0 +1,11 @@
+digraph "DirectedGraph" {
+ graph [concentrate = true];
+ center=true;
+ fontsize=6;
+ node [ color=blue,shape="box"fontsize=6,fontcolor=black,fontname=Arial];
+ edge [ color=black,fontsize=6,fontcolor=black,fontname=Arial];
+"void projetogdi/views/TelaCadastro.<init>()"[color="red", fontsize="6", fontname="Arial"];
+"void projetogdi/views/TelaCadastro.initialize()" -> "void projetogdi/views/TelaCadastro.initialize()" [label="javax/swing/JFrame projetogdi/views/TelaCadastro.frmProjetoGdi : 48" ]
+"void projetogdi/views/TelaCadastro.initialize()" -> "void projetogdi/views/TelaCadastro.initialize()" [label="javax/swing/JTextField projetogdi/views/TelaCadastro.clientCPF : 70" ]
+"void projetogdi/views/TelaCadastro.initialize()" -> "void projetogdi/views/TelaCadastro.initialize()" [label="javax/swing/JTextField projetogdi/views/TelaCadastro.clientName : 55" ]
+}

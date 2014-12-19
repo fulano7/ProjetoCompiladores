@@ -1,4 +1,4 @@
-package models;
+package projetogdi.models;
 
 public class Cliente {
 	
