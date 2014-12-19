@@ -118,4 +118,30 @@ public class TestProjetoIPEmpacotado {
     assertTrue(new File(expectedResultsFile).exists());
     assertEquals(readFile(expectedResultsFile), graph.toDotString());
   }
+
+  @Test
+  /**
+   * Known issue: doesn't provide support for 'implements' clause
+   * @throws IOException
+   * @throws WalaException
+   * @throws CancelException
+   * @throws ParseException
+   * @throws InvalidClassFileException
+   */
+  public void test5() throws IOException, WalaException, CancelException,
+      ParseException, InvalidClassFileException {
+    String classFileLine = "if (produtos[i].getCodigo() == produto.getCodigo()) {";
+    String classFilePath = APPS_SRC_DIR
+        + "/br/ufpe/cin/dados/RepositorioProdutosArray.java";
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+    String expectedResultsFile = getExpectedResultsFilePath();
+    PrintWriter fileWriter = new PrintWriter(
+        new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
 }
