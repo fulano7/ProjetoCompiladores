@@ -8,13 +8,14 @@ import static rwsets.Helper.EXCLUSION_FILE_FOR_CALLGRAPH;
 import static rwsets.Helper.USER_DIR;
 import static rwsets.Helper.getExpectedResultsFilePath;
 import static rwsets.Helper.readFile;
-
 import japa.parser.ParseException;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import javax.swing.JFrame;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,31 @@ public class TestProjetoGDI {
       ParseException, InvalidClassFileException {
     String classFileLine = "TelaPrincipal frame = new TelaPrincipal();";
     String classFilePath = APPS_SRC_DIR
-        + "/Projeto-GDI/src/views/TelaPrincipal.java";
+        + "/Projeto-GDI/views/TelaPrincipal.java";
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+    String expectedResultsFile = getExpectedResultsFilePath();
+    PrintWriter fileWriter = new PrintWriter(
+        new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  /**
+   * @throws IOException
+   * @throws WalaException
+   * @throws CancelException
+   * @throws ParseException
+   * @throws InvalidClassFileException
+   */
+  @Test
+  public void test2() throws IOException, WalaException, CancelException,
+      ParseException, InvalidClassFileException {
+    String classFileLine = "initialize();";
+    String classFilePath = APPS_SRC_DIR
+        + "/Projeto-GDI/views/TelaCadastro.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
