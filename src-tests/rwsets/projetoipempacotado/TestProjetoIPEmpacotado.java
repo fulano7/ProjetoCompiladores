@@ -57,7 +57,7 @@ public class TestProjetoIPEmpacotado {
   @Test
   public void test1() throws IOException {
     String classFileLine = "if (pedidos[i].getCodigo() == pedido.getCodigo()) {";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
@@ -76,7 +76,7 @@ public class TestProjetoIPEmpacotado {
   @Test
   public void test2() throws IOException {
     String classFileLine = "if (this.procurar(pedido.getCodigo()) == null) {";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
@@ -95,7 +95,7 @@ public class TestProjetoIPEmpacotado {
   @Test
   public void test3() throws IOException {
     String classFileLine = "return null;";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
@@ -114,7 +114,7 @@ public class TestProjetoIPEmpacotado {
   @Test
   public void test4() throws IOException {
     String classFileLine = "if (pedidos[i].getCodigo().equals(codigo)) {";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
@@ -133,7 +133,7 @@ public class TestProjetoIPEmpacotado {
   @Test
   public void test5() throws IOException {
     String classFileLine = "retorno = pedidos[i];";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
@@ -161,7 +161,7 @@ public class TestProjetoIPEmpacotado {
    */
   public void test6() throws IOException {
     String classFileLine = "if (produtos[i].getCodigo() == produto.getCodigo()) {";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioProdutosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioProdutosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
@@ -191,7 +191,7 @@ public class TestProjetoIPEmpacotado {
    */
   public void test7() throws IOException {
     String classFileLine = "retorno = produtos[i];";
-    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioProdutosArray.java";
+    String classFilePath = APPS_SRC_DIR + "/IP/br/ufpe/cin/dados/RepositorioProdutosArray.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
