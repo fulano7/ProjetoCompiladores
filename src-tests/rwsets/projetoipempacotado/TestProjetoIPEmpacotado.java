@@ -48,6 +48,7 @@ public class TestProjetoIPEmpacotado {
 
   /**
    * Known issue: breaks for subpackages - Fixed
+   * RWSets generates invalid class name in depend/util/parser/Util.getLineAndWALAClassName:(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;, it's necessary a workaround
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
