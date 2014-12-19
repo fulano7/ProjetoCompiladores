@@ -56,7 +56,7 @@ public class TestProjetoIPEmpacotado {
       ParseException, InvalidClassFileException {
     String classFileLine = "if (pedidos[i].getCodigo() == pedido.getCodigo()) {";
     String classFilePath = APPS_SRC_DIR
-        + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+        + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
@@ -73,7 +73,7 @@ public class TestProjetoIPEmpacotado {
       ParseException, InvalidClassFileException {
     String classFileLine = "if (this.procurar(pedido.getCodigo()) == null) {";
     String classFilePath = APPS_SRC_DIR
-        + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+        + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
@@ -90,7 +90,7 @@ public class TestProjetoIPEmpacotado {
       ParseException, InvalidClassFileException {
     String classFileLine = "Pedido retorno = null;";
     String classFilePath = APPS_SRC_DIR
-        + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+        + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
@@ -107,7 +107,7 @@ public class TestProjetoIPEmpacotado {
       ParseException, InvalidClassFileException {
     String classFileLine = "if (pedidos[i].getCodigo().equals(codigo)) {";
     String classFilePath = APPS_SRC_DIR
-        + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+        + "/IP/br/ufpe/cin/dados/RepositorioPedidosArray.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
@@ -132,7 +132,7 @@ public class TestProjetoIPEmpacotado {
       ParseException, InvalidClassFileException {
     String classFileLine = "if (produtos[i].getCodigo() == produto.getCodigo()) {";
     String classFilePath = APPS_SRC_DIR
-        + "/br/ufpe/cin/dados/RepositorioProdutosArray.java";
+        + "/IP/br/ufpe/cin/dados/RepositorioProdutosArray.java";
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
     SimpleGraph graph = analyze(classFilePath, classFileLine);
     String expectedResultsFile = getExpectedResultsFilePath();
