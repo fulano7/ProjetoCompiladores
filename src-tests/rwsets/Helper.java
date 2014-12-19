@@ -21,4 +21,18 @@ public class Helper {
     fr.close();
     return sb.toString();
   }
+  
+  private static String getCurrentTestName() {
+    Thread currentThread = Thread.currentThread();
+    
+    StackTraceElement[] stackTrace = currentThread.getStackTrace();
+    
+    String testName = stackTrace[3].getClassName().replace(".", "/") + "." + stackTrace[3].getMethodName();
+    
+    return testName;
+  }
+  
+  public static String getExpectedResultsFilePath() {
+    return String.format("%s/%s.data", TEST_DIR, getCurrentTestName());
+  }
 }
