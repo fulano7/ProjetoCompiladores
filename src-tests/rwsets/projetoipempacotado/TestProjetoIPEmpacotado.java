@@ -1,6 +1,5 @@
 package rwsets.projetoipempacotado;
 
-import static depend.Main.analyze;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static rwsets.Helper.CLASS_NOT_FOUND;
@@ -30,6 +29,7 @@ public class TestProjetoIPEmpacotado {
   private static final String APPS_JAR_DIR = APPS_DIR;
   private static final String APPS_SRC_DIR = APPS_DIR + "/src";
   private static final String JAR_FILE = APPS_JAR_DIR + "/projetoipempacotado.jar";
+  private static final String PACKAGE_FILTER = "br/ufpe/cin";
   
   @Before
   public void setup() {
@@ -38,6 +38,11 @@ public class TestProjetoIPEmpacotado {
     assertTrue(new File(EXCLUSION_FILE_FOR_CALLGRAPH).exists());
   }
 
+  private static SimpleGraph analyze(String classFilePath, String classFileLine) throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException
+  {
+    return depend.Main.analyze(JAR_FILE, PACKAGE_FILTER, classFilePath, classFileLine);
+  }
+  
   /**
    * Known issue: breaks for subpackages - Fixed
    * @throws IOException
@@ -47,23 +52,78 @@ public class TestProjetoIPEmpacotado {
    * @throws InvalidClassFileException
    */
   @Test
-  public void test0() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+  public void test1() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
     String classFileLine = "if (pedidos[i].getCodigo() == pedido.getCodigo()) {";
     String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
-    String packageFilter = "br/ufpe/cin";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 
-    SimpleGraph graph = analyze(JAR_FILE, packageFilter, classFilePath, classFileLine);
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
     
     String expectedResultsFile = getExpectedResultsFilePath();
     
-    if (new File(expectedResultsFile).createNewFile()) {
-      PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
-      fileWriter.print(graph.toDotString());
-      fileWriter.close();
-    }
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
 
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  @Test
+  public void test2() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+    String classFileLine = "if (this.procurar(pedido.getCodigo()) == null) {";
+    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+    
+    String expectedResultsFile = getExpectedResultsFilePath();
+    
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  @Test
+  public void test3() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+    String classFileLine = "Pedido retorno = null;";
+    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+    
+    String expectedResultsFile = getExpectedResultsFilePath();
+    
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  @Test
+  public void test4() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+    String classFileLine = "if (pedidos[i].getCodigo().equals(codigo)) {";
+    String classFilePath = APPS_SRC_DIR + "/br/ufpe/cin/dados/RepositorioPedidosArray.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+    
+    String expectedResultsFile = getExpectedResultsFilePath();
+    
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
     assertEquals(readFile(expectedResultsFile), graph.toDotString());
   }
 }
