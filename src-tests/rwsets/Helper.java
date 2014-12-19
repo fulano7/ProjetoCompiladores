@@ -40,7 +40,7 @@ public class Helper {
     
     StackTraceElement[] stackTrace = currentThread.getStackTrace();
     
-    String testName = stackTrace[2].getClassName().replace(".", "/") + "." + stackTrace[2].getMethodName();
+    String testName = stackTrace[3].getClassName().replace(".", "/") + "." + stackTrace[3].getMethodName();
     
     return testName;
   }
