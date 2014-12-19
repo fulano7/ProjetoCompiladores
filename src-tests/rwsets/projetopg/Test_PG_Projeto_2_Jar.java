@@ -29,7 +29,7 @@ public class Test_PG_Projeto_2_Jar {
   private static final String APPS_JAR_DIR = APPS_DIR;
   private static final String APPS_SRC_DIR = APPS_DIR + "/src";
   private static final String JAR_FILE = APPS_JAR_DIR + "/PG_Projeto_2.jar";
-  private static final String PACKAGE_FILTER = "";
+  private static final String PACKAGE_FILTER = "pgprojeto2";
 
   @Before
   public void setup() {
@@ -47,7 +47,7 @@ public class Test_PG_Projeto_2_Jar {
   }
 
   /**
-   * KUnexpected result: can't find class 'Core'
+   * Unexpected result: can't find class 'Core'
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
@@ -57,7 +57,61 @@ public class Test_PG_Projeto_2_Jar {
   @Test
   public void test1() throws IOException {
     String classFileLine = "luz = leitura_luz(iluninacaoParam);";
-    String classFilePath = APPS_SRC_DIR + "/PG_Projeto_2/src/Core.java";
+    String classFilePath = APPS_SRC_DIR + "/PG_Projeto_2/pgprojeto2/Core.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+
+    String expectedResultsFile = getExpectedResultsFilePath();
+
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  /**
+   * Unexpected result: can't find class 'Superficie'
+   * @throws IOException
+   * @throws WalaException
+   * @throws CancelException
+   * @throws ParseException
+   * @throws InvalidClassFileException
+   */
+  @Test
+  public void test2() throws IOException {
+    String classFileLine = "int resY = box.imagem[fzInt-1].getHeight(); int resX = box.imagem[fzInt-1].getWidth();";
+    String classFilePath = APPS_SRC_DIR + "/PG_Projeto_2/pgprojeto2/Superficie.java";
+
+    assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
+
+    SimpleGraph graph = analyze(classFilePath, classFileLine);
+
+    String expectedResultsFile = getExpectedResultsFilePath();
+
+    PrintWriter fileWriter = new PrintWriter(new FileWriter(expectedResultsFile));
+    fileWriter.print(graph.toDotString());
+    fileWriter.close();
+
+    assertTrue(new File(expectedResultsFile).exists());
+    assertEquals(readFile(expectedResultsFile), graph.toDotString());
+  }
+  
+  /**
+   * Unexpected result: throws null pointer exception
+   * @throws IOException
+   * @throws WalaException
+   * @throws CancelException
+   * @throws ParseException
+   * @throws InvalidClassFileException
+   */
+  @Test
+  public void test3() throws IOException {
+    String classFileLine = "this.C = C;";
+    String classFilePath = APPS_SRC_DIR + "/PG_Projeto_2/pgprojeto2/Camera.java";
 
     assertTrue(CLASS_NOT_FOUND, new File(classFilePath).exists());
 

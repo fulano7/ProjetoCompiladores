@@ -1,3 +1,4 @@
+package pgprojeto2;
 
 class Objeto{
 	Ponto pontos_vista[], pontos_tela[], normais_triangulos[], normais_vertices[];

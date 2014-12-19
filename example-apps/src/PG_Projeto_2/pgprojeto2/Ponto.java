@@ -1,5 +1,7 @@
+package pgprojeto2;
 
-public class Ponto implements Comparable<Ponto> {
+public class Ponto {
+  //  implements Comparable<Ponto>
 	double x, y, z, s, t;
 	int indice;
 	int i, j;

@@ -1,3 +1,4 @@
+package pgprojeto2;
 
 public class Luz {
 	Ponto Pl, Ia;

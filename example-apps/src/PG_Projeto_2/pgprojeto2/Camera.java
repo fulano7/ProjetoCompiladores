@@ -1,5 +1,6 @@
+package pgprojeto2;
 
-class Camera{
+public class Camera {
 	Ponto C, V, N, U;
 	double d, hx, hy;
 	
