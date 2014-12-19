@@ -15,8 +15,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.swing.JFrame;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,6 +72,7 @@ public class TestProjetoGDI {
   }
   
   /**
+   * Unexpected result: throws null pointer exception
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
