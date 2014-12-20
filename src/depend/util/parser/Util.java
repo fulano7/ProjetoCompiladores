@@ -67,7 +67,7 @@ public class Util {
       br.close();
       sr.close();
     }
-    
+    //System.out.println(lastClassStr);
     /**
      * collecting class name 
      */
@@ -156,8 +156,9 @@ public class Util {
       StringBuffer sb = new StringBuffer();
       Util.visit(n, null, sb);
 //      System.out.println("===");
-//      System.out.println(sb.toString().trim());
-//      System.out.println(name);
+      //System.out.println(sb.toString().trim());
+ //System.out.println(cname);
+      
       if (sb.toString().trim().equals(cname.trim())) {
         found = true;
       }        
