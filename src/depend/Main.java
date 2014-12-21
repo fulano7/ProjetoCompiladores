@@ -120,8 +120,8 @@ public class Main {
    * graph in the output directory  
    * 
    * 
-   * @param jarFilePath
-   * @param packageFilter
+   * @param appJar
+   * @param appPrefix
    * @param strCompUnit
    * @param targetLineContents
    * @throws IOException
@@ -130,50 +130,54 @@ public class Main {
    * @throws ParseException
    * @throws InvalidClassFileException 
    */
-  public static SimpleGraph analyze(String jarFilePath, String packageFilter, String classFilePath, String classFileLine) throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {    
+  public static SimpleGraph analyze(
+      String appJar,  
+      String appPrefix,
+      String strCompUnit,
+      String targetLineContents) throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+    
     // line number and class in WALA format 
-    String[] lineAndClass = depend.util.parser.Util.getLineAndWALAClassName(classFileLine, classFilePath);
+    String[] lineAndClass = 
+        depend.util.parser.Util.getLineAndWALAClassName(targetLineContents+"", strCompUnit);
+    int targetLine = Integer.parseInt(lineAndClass[0]);
+    String targetClass = lineAndClass[1];    
     
-    int targetLineNumber = Integer.parseInt(lineAndClass[0]);
+    String USER_DIR = System.getProperty("user.dir");
+    String SEP = System.getProperty("file.separator");
     
-    String targetClass = lineAndClass[1].replace(".", "/");
-    String userDir = System.getProperty("user.dir");
-    String sep = System.getProperty("file.separator");
-    String exclusionFile = userDir + sep + "dat" + sep + "ExclusionAllJava.txt";
-    String exclusionFileForCallGraph = userDir + sep + "dat" + sep + "exclusionFileForCallGraph";
-    String dotPath = "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
+    // default values
+    String exclusionFile = USER_DIR + SEP + "dat" + SEP + "ExclusionAllJava.txt";
+    String exclusionFileForCallGraph = USER_DIR + SEP + "dat" + SEP + "exclusionFileForCallGraph";
+    String dotPath = "/usr/bin/dot";
     
     String[] args = new String[] {
-        "-appJar=" + jarFilePath, 
-        "-printWalaWarnings=" + false, 
-        "-exclusionFile=" + exclusionFile, 
-        "-exclusionFileForCallGraph=" + exclusionFileForCallGraph, 
-        "-dotPath=" + dotPath, 
-        "-appPrefix=" + packageFilter,
-        "-listAppClasses=" + false, 
-        "-listAllClasses=" + false, 
-        "-listAppMethods=" + false, 
-        "-genCallGraph=" + false, 
-        "-measureTime=" + false, 
-        "-reportType=" + "dot"
+        "-appJar="+appJar, 
+        "-printWalaWarnings="+false, 
+        "-exclusionFile="+exclusionFile, 
+        "-exclusionFileForCallGraph="+exclusionFileForCallGraph, 
+        "-dotPath="+dotPath, 
+        "-appPrefix="+appPrefix,
+        "-listAppClasses="+false, 
+        "-listAllClasses="+false, 
+        "-listAppMethods="+false, 
+        "-genCallGraph="+false, 
+        "-measureTime="+false, 
+        "-reportType="+"dot"
     };
     
     MethodDependencyAnalysis mda = createMDA(args);
     
     // find informed class
     IClass clazz = mda.getCHA().lookupClass(TypeReference.findOrCreate(ClassLoaderReference.Application, targetClass));
-    
     if (clazz == null) {
       throw new RuntimeException("Could not find class \"" + targetClass + "\"");
     }
-    
     // find informed method
-    IMethod imethod = findMethod(mda, clazz, targetLineNumber);
+    IMethod imethod = findMethod(mda, clazz, targetLine);
     
     // run the analysis
-    SimpleGraph graph = run(mda, imethod);
+    return run(mda, imethod);    
     
-    return graph;
   }
   
   public static IMethod findMethod(MethodDependencyAnalysis mda, IClass clazz, int targetLine) throws InvalidClassFileException {
