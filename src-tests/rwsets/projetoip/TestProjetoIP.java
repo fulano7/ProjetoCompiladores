@@ -67,7 +67,7 @@ public class TestProjetoIP {
   }
   
   /**
-   * Known issue: doesn't provide support for Java Interfaces.
+   * Known issue: doesn't provide support for 'implements' clause.
    * @throws InvalidClassFileException 
    * @throws ParseException 
    * @throws CancelException 
@@ -96,7 +96,5 @@ public class TestProjetoIP {
     Assert.assertEquals(Helper.readFile(expectedResultFile),sgTest0.toDotString());
     
   }
-  
-  
   
 }

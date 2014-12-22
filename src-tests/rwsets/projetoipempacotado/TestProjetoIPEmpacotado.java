@@ -47,8 +47,8 @@ public class TestProjetoIPEmpacotado {
   }
 
   /**
-   * Known issue: breaks for subpackages - Fixed
-   * RWSets generates invalid class name in depend/util/parser/Util.getLineAndWALAClassName:(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;, it's necessary a workaround
+   * Known issue: breaks for subpackages
+   * RWSets generates invalid class name in depend/util/parser/Util.getLineAndWALAClassName:(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;, a workaround is necessary
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
@@ -149,11 +149,11 @@ public class TestProjetoIPEmpacotado {
     assertTrue(new File(expectedResultsFile).exists());
     assertEquals(readFile(expectedResultsFile), graph.toDotString());
   }
-
-  @Test(expected = UnsupportedOperationException.class)
+  
+  @Test
   /**
    * Known issue: doesn't provide support for 'implements' clause
-   * A exceção é originalmente lançada na linha 291 do método depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
+   * A exceï¿½ï¿½o ï¿½ originalmente lanï¿½ada na linha 291 do mï¿½todo depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
@@ -178,12 +178,11 @@ public class TestProjetoIPEmpacotado {
     assertEquals(readFile(expectedResultsFile), graph.toDotString());
   }
   
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   /**
    * Known issue: doesn't provide support for 'implements' clause
-   * A exceção é originalmente lançada na linha 291 do método depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
-   * Com esse segundo teste para a mesma classe RepositorioProdutosArray é possível perceber que uma vez que a classe tenha
-   * a clásula 'implements', qualquer análise em seu código irá falhar
+   * Exception is thrown at line 291 of depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
+   * Doesn't provide support for 'implements' clause
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
