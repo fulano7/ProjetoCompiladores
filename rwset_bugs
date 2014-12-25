@@ -1,0 +1,38 @@
+Bugs
+
+File: src/depend/Main.java
+Class: Main
+Method: static SimpleGraph analyze(String, String, String, String)
+Line: 173
+Description: rwset is unable to find classes located in subpackages in the format 'pkg1.subpkg1.Class'.
+Detected by: tests 1,2,3,4,5 from TestProjetoIPEmpacotado.java and tests 2,3 from TestProjetoGDI.java
+
+File: src/depend/util/parser/Util.java
+Class: Util
+Method: static void printTypeArgs(List<Type>, Object, StringBuffer)
+Line: 291
+Description: rwset doesn't provide support for 'implements' clause.
+
+File: src/depend/util/parser/Util.java
+Class: Util
+Method: static String[] getLineAndWALAClassName(String, String)
+Line: 79
+Description: rwset doesn't provide support for multiple classes declared in a single compilation unit.
+Detected by: test 1 from projetogdi
+
+File: src/depend/Main.java
+Class: Main
+Method: static SimpleGraph analyze(String, String, String, String)
+Line: 173
+Description: rwsets doesn't provide support for 'extends' clause but it's unclear if this is the unique cause of the error.
+Detected by: test 1, 2 from projetopg
+
+File: src/depend/MethodDependencyAnalysis.java
+Class: MethodDependencyAnalysis
+Method: void updateRWSet(IMethod)
+Line: 318
+Description: Throws NullPointerException. Cause is unknown.
+Detected by: test 3 from projetopg
+
+In addition, rwsets is unable to use the empty string "" to filter packages (i.e. take all packages of the application as possible dependencies). This limitation isn't detected by any test.
+
