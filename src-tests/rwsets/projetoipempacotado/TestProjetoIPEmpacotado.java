@@ -153,7 +153,7 @@ public class TestProjetoIPEmpacotado {
   @Test
   /**
    * Known issue: doesn't provide support for 'implements' clause
-   * A exce��o � originalmente lan�ada na linha 291 do m�todo depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
+   * Exception is thrown at line 291 of depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
@@ -182,7 +182,6 @@ public class TestProjetoIPEmpacotado {
   /**
    * Known issue: doesn't provide support for 'implements' clause
    * Exception is thrown at line 291 of depend/util/parser/Util.printTypeArgs:(Ljava/util/List;Ljava/lang/Object;Ljava/lang/StringBuffer;)V
-   * Doesn't provide support for 'implements' clause
    * @throws IOException
    * @throws WalaException
    * @throws CancelException
