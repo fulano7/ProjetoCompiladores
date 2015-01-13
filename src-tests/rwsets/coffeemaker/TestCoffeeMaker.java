@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import rwsets.Helper;
+import rwsets.RWTest;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -23,30 +25,19 @@ import depend.MethodDependencyAnalysis;
 import depend.util.Util;
 import depend.util.graph.SimpleGraph;
 
-public class TestCoffeeMaker {
+public class TestCoffeeMaker extends RWTest {
   
-  String USER_DIR = System.getProperty("user.dir");
-  String SEP = System.getProperty("file.separator");
-  String EXAMPLES = USER_DIR + SEP + "example-apps";
-  String TEST_DIR = USER_DIR + SEP + "src-tests";
-  String EXAMPLES_SRC = EXAMPLES +  SEP + "src";
-  String EXAMPLES_JAR = EXAMPLES; 
-  String RESOURCES_DIR = USER_DIR + SEP + "dat";
-
+  @Before
+  public void setup() {
+    JAR_FILENAME = EXAMPLES_JAR + SEP + "coffee.jar";
+  }
+  
   @Test
   public void test0() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-
     String strCompUnit = EXAMPLES_SRC + SEP + "coffeemaker/CoffeeMaker.java";
-    String coffeejar = EXAMPLES_JAR + SEP + "coffee.jar";
-    
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    Assert.assertTrue((new File(coffeejar)).exists());
-    
     String line = "if(addRecipe(newRecipe)) {";
-    SimpleGraph sg = depend.Main.analyze(coffeejar, "coffee", strCompUnit, line);
-        
     String expectedResultFile = TEST_DIR + SEP + "rwsets/coffeemaker/TestCoffeeMaker.test0.data";
-    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
+    checkDeps("coffee", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
 
   @Test

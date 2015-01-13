@@ -5,13 +5,13 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-  // Add test classes here
- rwsets.geeoip.GeeoIpTest.class,
- rwsets.manuip.ManuIpTest.class,
- rwsets.hardware.HardwareTest.class,
- rwsets.robocode.RobocodeTests.class,
- rwsets.logica.LogicaTest.class
- 
+  rwsets.coffeemaker.TestCoffeeMaker.class,
+  rwsets.core.Sanity.class,
+ /* if688-2014.2-group-2 */
+  rwsets.escola.GeeoIpTest.class,
+  rwsets.hardware.HardwareTest.class,
+  rwsets.logica.LogicaTest.class,
+  rwsets.manuip.ManuIpTest.class
 })
 
 public class AllTests  { }

@@ -52,9 +52,9 @@ public class Util {
         if (s.contains("class")) {
           lastClassStr = s;
         }
-        if (s.replace(" ", "").contains(line)) {
+        if (s.replace(" ", "").trim().contains(line.trim())) {
           if (lineNumber != -1) {
-            throw new RuntimeException("umbiguous string");
+            throw new RuntimeException("ambiguous string");
           }
           lineNumber = i;
         }

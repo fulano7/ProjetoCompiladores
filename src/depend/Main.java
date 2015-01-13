@@ -133,14 +133,8 @@ public class Main {
   public static SimpleGraph analyze(
       String appJar,  
       String appPrefix,
-      String strCompUnit,
-      String targetLineContents) throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-    
-    // line number and class in WALA format 
-    String[] lineAndClass = 
-        depend.util.parser.Util.getLineAndWALAClassName(targetLineContents+"", strCompUnit);
-    int targetLine = Integer.parseInt(lineAndClass[0]);
-    String targetClass = lineAndClass[1];    
+      int targetLine,
+      String targetClass) throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
     
     String USER_DIR = System.getProperty("user.dir");
     String SEP = System.getProperty("file.separator");

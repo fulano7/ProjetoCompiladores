@@ -2,142 +2,89 @@ package rwsets.logica;
 
 import japa.parser.ParseException;
 
-import java.io.File;
 import java.io.IOException;
 
-
-
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import rwsets.Helper;
+import rwsets.RWTest;
 
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.WalaException;
 
-import depend.util.graph.SimpleGraph;
-
-public class LogicaTest {
-  String USER_DIR = System.getProperty("user.dir");
-  String SEP = System.getProperty("file.separator");
-  String EXAMPLES = USER_DIR + SEP + "example-apps";
-  String TEST_DIR = USER_DIR + SEP + "src-tests";
-  String EXAMPLES_SRC = EXAMPLES + SEP + "src";
-  String EXAMPLES_JAR = EXAMPLES;
-  String RESOURCES_DIR = USER_DIR + SEP + "dat";
+public class LogicaTest extends RWTest {
+  
+  @Before
+  public void setup() {
+    JAR_FILENAME = EXAMPLES_JAR + SEP + "logica.jar";
+  }
+  
+  String srcdir = EXAMPLES_SRC + SEP + "logica-src" ;
 
   @Test
-  public void testClearClausulas() throws IOException, WalaException,
-      CancelException, ParseException, InvalidClassFileException {
-    String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-        + "Resolucao.java";
-    String logica = EXAMPLES_JAR + SEP + "logica.jar";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    Assert.assertTrue((new File(logica)).exists());
+  public void testClearClausulas() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+
+    String strCompUnit = srcdir + SEP + "logica" + SEP + "Resolucao.java";
     String line = "clausulas.clear();";
-    SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-    System.out.println(sg.toDotString());
-    String expectedResultFile = TEST_DIR + SEP
-        + "rwsets/logica/LogicaTest.testClearClausulas.data";
-    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testClearClausulas.data";
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
 
   @Test
-  public void testFunctionsHorn() throws IOException, WalaException, CancelException,
-      ParseException, InvalidClassFileException {
-    String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-        + "Resolucao.java";
-    String logica = EXAMPLES_JAR + SEP + "logica.jar";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    Assert.assertTrue((new File(logica)).exists());
+  public void testFunctionsHorn() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+
+    String strCompUnit = srcdir + SEP +  "logica" + SEP + "Resolucao.java";
     String line = "if (Functions.verifyHorn(exp)){";
-    SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-    System.out.println(sg.toDotString());
-    String expectedResultFile = TEST_DIR + SEP
-        + "rwsets/logica/LogicaTest.testFunctionsHorn.data";
-    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testFunctionsHorn.data";
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
 
-  // 
   @Test
-  // if (Functions.SAT(exp, clausulas)){
-  public void testFunctionsSAT() throws IOException, WalaException, CancelException,
-      ParseException, InvalidClassFileException {
-    String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-        + "Resolucao.java";
-    String logica = EXAMPLES_JAR + SEP + "logica.jar";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    Assert.assertTrue((new File(logica)).exists());
+  public void testFunctionsSAT() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+    
+    String strCompUnit = srcdir + SEP +  "logica" + SEP + "Resolucao.java";
     String line = "if (Functions.SAT(exp, clausulas)){";
-    SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-    System.out.println(sg.toDotString());
-    String expectedResultFile = TEST_DIR + SEP
-        + "rwsets/logica/LogicaTest.testFunctionsSAT.data";
-    Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testFunctionsSAT.data";    
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
+  
   @Test
-  //if (verifyFNC(exp)){
-  public void testResolucaoFNC() throws IOException, WalaException, CancelException,
-  ParseException, InvalidClassFileException {
-String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-    + "Resolucao.java";
-String logica = EXAMPLES_JAR + SEP + "logica.jar";
-Assert.assertTrue((new File(strCompUnit)).exists());
-Assert.assertTrue((new File(logica)).exists());
-String line = " if (Functions.verifyFNC(exp)){";
-SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-System.out.println(sg.toDotString());
-String expectedResultFile = TEST_DIR + SEP
-    + "rwsets/logica/LogicaTest.testResolucaoFNC2.data";
-Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
-}
+  public void testResolucaoFNC() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+
+    String strCompUnit = srcdir + SEP +  "logica" + SEP + "Resolucao.java";
+    String line = " if (Functions.verifyFNC(exp)){";
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testResolucaoFNC2.data";
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
+  }
+  
   @Test
-  //if (verifyFNC(exp)){
-  public void testResolucaoFNC2() throws IOException, WalaException, CancelException,
-  ParseException, InvalidClassFileException {
-String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-    + "Resolucao2.java";
-String logica = EXAMPLES_JAR + SEP + "logica.jar";
-Assert.assertTrue((new File(strCompUnit)).exists());
-Assert.assertTrue((new File(logica)).exists());
-String line = "return Functions.verifyFNC(exp);";
-SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-System.out.println(sg.toDotString());
-String expectedResultFile = TEST_DIR + SEP
-    + "rwsets/logica/LogicaTest.testResolucaoFNC2.data";
-Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
-}
+  public void testResolucaoFNC2() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+
+    String strCompUnit = srcdir + SEP + "logica" + SEP + "Resolucao2.java";
+    String line = "return Functions.verifyFNC(exp);";
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testResolucaoFNC2.data";
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
+  }
+  
   @Test
-  ///if (isLiteral(clausulas.get(i)))
-  public void testFunctionsIsLiteral() throws IOException, WalaException, CancelException,
-  ParseException, InvalidClassFileException {
-String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-    + "Functions.java";
-String logica = EXAMPLES_JAR + SEP + "logica.jar";
-Assert.assertTrue((new File(strCompUnit)).exists());
-Assert.assertTrue((new File(logica)).exists());
-String line = "if (isLiteral(clausulas.get(i)))";
-SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-System.out.println(sg.toDotString());
-String expectedResultFile = TEST_DIR + SEP
-    + "rwsets/logica/LogicaTest.testFunctionsIsLiteral.data";
-Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
-} 
+  public void testFunctionsIsLiteral() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+
+    String strCompUnit =srcdir + SEP +  "logica" + SEP + "Functions.java";
+    String line = "if (isLiteral(clausulas.get(i)))";
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testFunctionsIsLiteral.data";
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
+  }
+  
+  
   //  i = eliminar(clausulas, cl, i, j);
   @Test
-  public void testFunctionsEliminar() throws IOException, WalaException, CancelException,
-  ParseException, InvalidClassFileException {
-String strCompUnit = EXAMPLES_SRC + SEP + "Logica" + SEP + "logica" + SEP
-    + "Functions.java";
-String logica = EXAMPLES_JAR + SEP + "logica.jar";
-Assert.assertTrue((new File(strCompUnit)).exists());
-Assert.assertTrue((new File(logica)).exists());
-String line = "i = eliminar(clausulas, cl, i, j);";
-SimpleGraph sg = depend.Main.analyze(logica, "logica", strCompUnit, line);
-System.out.println(sg.toDotString());
-String expectedResultFile = TEST_DIR + SEP
-    + "rwsets/logica/LogicaTest.testFunctionsEliminar.data";
-Assert.assertEquals(Helper.readFile(expectedResultFile), sg.toDotString());
-} 
+  public void testFunctionsEliminar() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
+
+    String strCompUnit = srcdir + SEP +  "logica" + SEP + "Functions.java";
+    String line = "i = eliminar(clausulas, cl, i, j);";
+    String expectedResultFile = TEST_DIR + SEP + "rwsets/logica/LogicaTest.testFunctionsEliminar.data";
+    checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
+  } 
+
 }
