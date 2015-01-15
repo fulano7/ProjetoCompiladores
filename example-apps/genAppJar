@@ -23,11 +23,12 @@ case "$1" in
 	NAME="foo"
         CP="" 
 	;;
-    "soot" ) 
-	PREFIX="soot"
-	NAME="soot"
-        CP="" 
-	;;
+    "robocode" )
+        ## missing library!!
+	PREFIX="robocode"
+	NAME="robocode"
+        CP=""
+        ;;
     * ) 
 	echo "please inform the name of the subject "
 	exit;

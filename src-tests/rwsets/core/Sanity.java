@@ -2,10 +2,7 @@ package rwsets.core;
 
 import japa.parser.ParseException;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -15,6 +12,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import rwsets.Helper;
+import rwsets.RWTest;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -30,34 +28,19 @@ import depend.MethodDependencyAnalysis;
 import depend.util.Util;
 import depend.util.graph.SimpleGraph;
 
-public class Sanity {
-  
-  String USER_DIR = System.getProperty("user.dir");
-  String SEP = System.getProperty("file.separator");
-  String EXAMPLES = USER_DIR + SEP + "example-apps";
-  String EXAMPLES_SRC = EXAMPLES +  SEP + "src";
-  String EXAMPLES_JAR = EXAMPLES; 
-  String TEST_DIR = USER_DIR + SEP + "src-tests";
-  String FOO_JAR = EXAMPLES_JAR + SEP + "foo.jar";
-  String RESOURCES_DIR = USER_DIR + SEP + "dat";
-  String EXCLUSION_FILE = RESOURCES_DIR + SEP + "ExclusionAllJava.txt";
-  String EXCLUSION_FILE_FOR_CALLGRAPH = RESOURCES_DIR + SEP + "ExclusionForCallGraph.txt";
+public class Sanity extends RWTest {
   
   @Before
   public void setup() {
-    Assert.assertTrue((new File(EXCLUSION_FILE)).exists());
-    Assert.assertTrue((new File(EXCLUSION_FILE_FOR_CALLGRAPH)).exists());
-    Assert.assertTrue((new File(FOO_JAR)).exists());
+    super.setup();
+    JAR_FILENAME = EXAMPLES_JAR + SEP + "foo.jar";
   }
-  
   
   @Test
   public void testBasicDoesNotCrash() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
     String strCompUnit = EXAMPLES_SRC + SEP + "foo/D.java";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    String line = "System.out.println(\"hello\");";    
-    // check for crashes
-    depend.Main.analyze(FOO_JAR, "foo", strCompUnit, line);
+    String line = "System.out.println(\"hello\");";   
+    checkDeps("foo", strCompUnit, line, JAR_FILENAME, null);
   }
   
   @Test
@@ -77,7 +60,7 @@ public class Sanity {
     String dotPath = "/usr/bin/dot";
     
     String[] args = new String[] {
-        "-appJar=" + FOO_JAR, 
+        "-appJar=" + JAR_FILENAME, 
         "-printWalaWarnings=" + false, 
         "-exclusionFile=" + EXCLUSION_FILE, 
         "-exclusionFileForCallGraph=" +EXCLUSION_FILE_FOR_CALLGRAPH, 
@@ -116,67 +99,34 @@ public class Sanity {
   
   @Test
   public void testPrimitiveTypeDependency() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-
     String strCompUnit = EXAMPLES_SRC + SEP + "foo/B.java";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    
     String line = "a.y + a.z > c.y + w";    
-    SimpleGraph sg = depend.Main.analyze(FOO_JAR, "foo", strCompUnit, line);
-
-    // check
     String expectedResultFile = TEST_DIR + "/rwsets/core/Sanity.testPrimitiveTypeDependency.data";
-    String expected = Helper.readFile(expectedResultFile);
-    Assert.assertEquals(expected, sg.toDotString());
+    checkDeps("foo", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
   
   @Test
   public void testArrayDependency() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-    
     String strCompUnit = EXAMPLES_SRC + SEP + "foo/FooArray.java";
-    
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    
     String line = "t[1] = t[1] + \"!\";";    
-    SimpleGraph sg = depend.Main.analyze(FOO_JAR, "foo", strCompUnit, line);
-
-    // check
     String expectedResultFile = TEST_DIR + "/rwsets/core/Sanity.testArrayDependency.data";
-    String expected = Helper.readFile(expectedResultFile);
-    Assert.assertEquals(expected, sg.toDotString());
-    
+    checkDeps("foo", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
   
   @Test
   public void testReferenceDependency() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-
     String strCompUnit = EXAMPLES_SRC + SEP + "foo/FooReference.java";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    
     String line = "System.out.println(t);";    
-    SimpleGraph sg = depend.Main.analyze(FOO_JAR, "foo", strCompUnit, line);
-
-    // check
     String expectedResultFile = TEST_DIR + "/rwsets/core/Sanity.testReferenceDependency.data";
-    String expected = Helper.readFile(expectedResultFile);
-    Assert.assertEquals(expected, sg.toDotString());
-    
+    checkDeps("foo", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
   
   @Test
   public void testCollectionsDependency() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
-    
     String strCompUnit = EXAMPLES_SRC + SEP + "foo/FooCollections.java";
-    Assert.assertTrue((new File(strCompUnit)).exists());
-    
     String line = "(t.size())";    
-    SimpleGraph sg = depend.Main.analyze(FOO_JAR, "foo", strCompUnit, line);
-    
-    // check
-    //TODO: Paulo and Mateus, please check if this is correct. -Marcelo
     String expectedResultFile = TEST_DIR + "/rwsets/core/Sanity.testCollectionsDependency.data";
-    String expected = Helper.readFile(expectedResultFile);
-    Assert.assertEquals(expected, sg.toDotString());
-    
+    checkDeps("foo", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
 
   @Test
@@ -191,7 +141,7 @@ public class Sanity {
     String targetMethod = "read()V";
     
     String[] args = new String[] { 
-        "-appJar=" + FOO_JAR,
+        "-appJar=" + JAR_FILENAME,
         "-printWalaWarnings=" + false, 
         "-exclusionFile=" + EXCLUSION_FILE,
         "-exclusionFileForCallGraph=" + EXCLUSION_FILE_FOR_CALLGRAPH,
