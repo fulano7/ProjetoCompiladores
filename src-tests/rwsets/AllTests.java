@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   // Add test classes here
   rwsets.coffeemaker.TestCoffeeMaker.class,
-  rwsets.core.Sanity.class
+  rwsets.core.Sanity.class,
+  rwsets.soot.SootTests.class
 })
 
 public class AllTests  { }

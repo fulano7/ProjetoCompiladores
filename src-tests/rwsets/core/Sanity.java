@@ -162,7 +162,6 @@ public class Sanity {
     
   }
   
-  @Ignore
   @Test
   public void testCollectionsDependency() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
     
@@ -180,7 +179,6 @@ public class Sanity {
     
   }
 
-  @Ignore
   @Test
   public void testFlowSensitivity() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
     
