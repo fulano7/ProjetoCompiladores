@@ -5,6 +5,7 @@ import japa.parser.ParseException;
 import java.io.IOException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import rwsets.RWTest;
@@ -49,6 +50,7 @@ public class LogicaTest extends RWTest {
     checkDeps("logica", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
   
+  @Ignore
   @Test
   public void testResolucaoFNC() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
 

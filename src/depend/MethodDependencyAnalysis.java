@@ -3,6 +3,7 @@ package depend;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,6 +14,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 
+import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.cfg.ControlFlowGraph;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IBytecodeMethod;
@@ -28,6 +30,11 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cfg.AbstractInterproceduralCFG;
 import com.ibm.wala.ipa.cfg.InterproceduralCFG;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
@@ -173,7 +180,10 @@ public class MethodDependencyAnalysis {
             Util.getStringProperty("dotPath"));
         System.out.println("===");
       }
-
+      
+      //simple example of how to use pointer analysis. 
+      searchAliasedPointers(cgg);
+        
       // propagate RWSet from callees (only private methods) to callers
       propagateRWSets(graph);
       if (debugTime) {
@@ -191,6 +201,100 @@ public class MethodDependencyAnalysis {
       System.out.println(Warnings.asString());
     }
 
+  }
+
+  //print possible alias for pointers. 
+  //more info at: http://wala.sourceforge.net/wiki/index.php/UserGuide:PointerAnalysis#Heap_Graph
+  private void searchAliasedPointers(CallGraphGenerator cgg)
+      throws CallGraphBuilderCancelException {
+    PointerAnalysis pa = cgg.getPointerAnalysis();
+    Iterator<PointerKey> it = pa.getHeapModel().iteratePointerKeys();
+    HeapGraph hgraph = pa.getHeapGraph();
+    while (it.hasNext()) {
+ 
+      PointerKey pkey = it.next();
+      if (pkey instanceof InstanceFieldKey) { 
+        //pointer to a field associated with a set of instances.
+        //Note that a single field can have multiple PointerKeys.
+        InstanceFieldKey ifk = (InstanceFieldKey) pkey;
+        
+        //filter relevant fields
+        if (ifk.getField().toString().contains(Util.APP_PREFIX)) {
+          IField ifield = ifk.getField();
+          System.out.println("Analyzing the field/site: "
+              + ifield + "--" + ifk.getInstanceKey());
+        } else {
+          continue;
+        }
+      } else if (pkey instanceof LocalPointerKey) {
+       //pointer to a local
+        LocalPointerKey lpk = (LocalPointerKey) pkey;
+        IMethod lpkMethod = lpk.getNode().getMethod();
+        
+        //filter relevant fields
+        //More info: http://wala.sourceforge.net/wiki/index.php/UserGuide:IR#Value_Numbering
+        if (lpkMethod.toString().contains(Util.APP_PREFIX)) {
+          IR ir = cache.getIRFactory().makeIR(lpkMethod, Everywhere.EVERYWHERE,
+              options.getSSAOptions());
+           
+          //Looks like all this crap wasn't needed to get the names of the variables.
+          //I'm leaving it for now because there is some useful code and info
+          //that may be of interest in the future.
+//          DefUse df = cache.getSSACache().findOrCreateDU(ir, Everywhere.EVERYWHERE);
+//          SSAInstruction defInstruction = df.getDef(lpk.getValueNumber());
+//          
+//          if (defInstruction == null) { //it's a parameter or a constant
+//            continue;
+//          } else {
+//            int index = -1;
+//            SSAInstruction[] allInstructions = ir.getInstructions();
+//            for (int i = 0; i < allInstructions.length; i++) {
+//              //TODO SSAInstruction "equals" method use reference comparison, and we create multiple IR objects.
+//              //We should keep an canonical version of every IR, or update to the latest version.
+//              //This issue was fixed recently (see https://github.com/wala/WALA/pull/59).
+//              SSAInstruction cur = allInstructions[i];
+//              if (cur != null && defInstruction.toString().equals(cur.toString())) {
+//                index = i;
+//                break;
+//              }
+//            }
+//            String[] names = ir.getLocalNames(index, lpk.getValueNumber());
+            String[] names = ir.getLocalNames(ir.getInstructions().length - 1, lpk.getValueNumber());
+            System.out.println("Analyzing local variable " + Arrays.toString(names) + " in method " + lpkMethod);
+        } else {
+          continue;
+        }
+      } else {
+        continue;
+      }
+      
+      Iterator<Object> pointedInstances = hgraph.getSuccNodes(pkey);
+      while (pointedInstances.hasNext()) {
+        InstanceKey ikey = (InstanceKey) pointedInstances.next();
+        Iterator<Object> possibleAlias = hgraph.getPredNodes(ikey);
+
+        while (possibleAlias.hasNext()) {
+          PointerKey aliasPKey = (PointerKey) possibleAlias.next();
+          if (!aliasPKey.equals(pkey)) {
+            if (aliasPKey instanceof InstanceFieldKey) {
+              InstanceFieldKey aliasIFK = (InstanceFieldKey) aliasPKey;
+              IField aliasIField = aliasIFK.getField();
+              System.out.println(" > possible alias: field " + aliasIField);
+            
+            } else if (aliasPKey instanceof LocalPointerKey) {
+              LocalPointerKey aliasLPK = (LocalPointerKey) aliasPKey;
+              IMethod lpkMethod = aliasLPK.getNode().getMethod();
+              IR ir = cache.getIRFactory().makeIR(lpkMethod, Everywhere.EVERYWHERE,
+                  options.getSSAOptions());
+              String[] names = ir.getLocalNames(ir.getInstructions().length - 1, aliasLPK.getValueNumber());
+              System.out.println(" > possible alias: local " + Arrays.toString(names) + " in method " + lpkMethod);
+            } else {
+              System.out.println(" > unhandled pointer type: " + aliasPKey.getClass());
+            }
+          }
+        }
+      }
+    }
   }
 
   private void setup() throws IOException,

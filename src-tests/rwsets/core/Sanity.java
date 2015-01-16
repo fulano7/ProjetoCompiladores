@@ -121,7 +121,6 @@ public class Sanity extends RWTest {
     checkDeps("foo", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
   
-  @Ignore
   @Test
   public void testCollectionsDependency() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException {
     String strCompUnit = EXAMPLES_SRC + SEP + "foo/FooCollections.java";
@@ -130,7 +129,6 @@ public class Sanity extends RWTest {
     checkDeps("foo", strCompUnit, line, JAR_FILENAME, expectedResultFile);
   }
 
-  @Ignore
   @Test
   public void testFlowSensitivity() throws IOException, WalaException, CancelException, ParseException, InvalidClassFileException{
     

@@ -15,6 +15,7 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
+import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -31,6 +32,7 @@ public class CallGraphGenerator {
   ClassHierarchy cha;
 
   private CallGraph cg;
+  private PointerAnalysis pa;
 
   public CallGraphGenerator(AnalysisScope scope, ClassHierarchy cha) throws IOException, ClassHierarchyException {
     this.scope = scope;
@@ -53,10 +55,17 @@ public class CallGraphGenerator {
     if(this.cg == null){
       Iterable<Entrypoint> entrypoints = entryPoints(scope.getApplicationLoader(), cha);
       AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
-      com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroCFABuilder(options, new AnalysisCache(), cha, scope);
+      com.ibm.wala.ipa.callgraph.CallGraphBuilder builder = com.ibm.wala.ipa.callgraph.impl.Util.makeZeroOneContainerCFABuilder(options, new AnalysisCache(), cha, scope);
       this.cg = builder.makeCallGraph(options, null);
+      this.pa = builder.getPointerAnalysis();
     }
     return cg;
+  }
+  
+  public PointerAnalysis getPointerAnalysis() throws CallGraphBuilderCancelException {
+    //build cg/pa if needed
+    getFullCallGraph();
+    return this.pa;
   }
 
   private HashSet<Entrypoint> result = HashSetFactory.make();

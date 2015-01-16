@@ -25,7 +25,7 @@ public class Util {
   
   /************** CONSTANTS **************/
   
-  private static String APP_PREFIX;
+  public static String APP_PREFIX;
 
   private static Properties PROPS;
   
