@@ -16,13 +16,19 @@ case "$1" in
     "coffee" ) 
 	PREFIX="coffeemaker"
 	NAME="$1"
-        CP="" 
+        CP="../../libs/junit-4.11.jar"  #TODO fix this hardcoded path
 	;;
     "foo" ) 
 	PREFIX="foo"
 	NAME="foo"
         CP="" 
 	;;
+    "robocode" )
+        ## missing library!!
+	PREFIX="robocode"
+	NAME="robocode"
+        CP=""
+        ;;
     * ) 
 	echo "please inform the name of the subject "
 	exit;
@@ -32,7 +38,7 @@ esac
 
 (cd ${HERE}/src/;
     ## compile into BINDIR
-    find "${PREFIX}" -name "*.java" | xargs javac -cp "${CP}"
+    find "${PREFIX}" -name "*.java" | xargs javac -g -cp "${CP}"
     ## create jar file
     find "${PREFIX}" -name "*.class" | xargs jar cvf ${NAME}.jar
     ## move jar file

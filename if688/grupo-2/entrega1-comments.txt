@@ -1,0 +1,3 @@
+escola: precisa de biblioteca "apache poi"
+hardware:
+robocode: nao sei qual biblioteca robocode devo usar

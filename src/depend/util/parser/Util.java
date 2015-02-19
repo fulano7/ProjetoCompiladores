@@ -52,9 +52,9 @@ public class Util {
         if (s.contains("class")) {
           lastClassStr = s;
         }
-        if (s.replace(" ", "").contains(line)) {
+        if (s.replace(" ", "").trim().contains(line.trim())) {
           if (lineNumber != -1) {
-            throw new RuntimeException("umbiguous string");
+            throw new RuntimeException("ambiguous string");
           }
           lineNumber = i;
         }
@@ -67,7 +67,7 @@ public class Util {
       br.close();
       sr.close();
     }
-    
+    //System.out.println(lastClassStr);
     /**
      * collecting class name 
      */
@@ -102,7 +102,7 @@ public class Util {
     StringBuffer sb = new StringBuffer();
     sb.append("L");
     if (pd != null) {
-      sb.append(pd.getName());
+      sb.append(pd.getName().toString().replaceAll("\\.", "/"));
       sb.append("/");
     }
     for (int i = 0; i < stack.size(); i++) {
@@ -112,6 +112,7 @@ public class Util {
         sb.append("$");
       }
     }
+
     return sb.toString();
   }
 
@@ -156,8 +157,9 @@ public class Util {
       StringBuffer sb = new StringBuffer();
       Util.visit(n, null, sb);
 //      System.out.println("===");
-//      System.out.println(sb.toString().trim());
-//      System.out.println(name);
+      //System.out.println(sb.toString().trim());
+ //System.out.println(cname);
+      
       if (sb.toString().trim().equals(cname.trim())) {
         found = true;
       }        

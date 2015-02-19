@@ -7,7 +7,7 @@ CURRDIR="$(X=`pwd` && find $X -name "common" | sed "s/common//").."
 source ${CURRDIR}/scripts/common
 
 ## make sure you build first
-${CURRDIR}/scripts/build
+##${CURRDIR}/scripts/build
 
 ## go to the project root
 cd ..

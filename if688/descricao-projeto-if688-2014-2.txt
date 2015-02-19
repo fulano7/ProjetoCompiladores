@@ -1,0 +1,47 @@
+Este projeto tem como objetivo experimentar uma implementacao do
+algoritmo de RW sets e melhorar este algoritmo com informacao de
+points-to.
+
+Atividade 1: Experiencia com algoritmo de RW sets
+
+Fonte: git clone https://github.com/damorim/rwset.git
+
+Atividade: 
+ Preparar casos de teste (ver pasta src-tests)
+ - 3 applicacoes com >2 classes e mais de 200LOC
+ - 1 aplicacao com >5classes e mais de 1KLOC
+
+Data da entrega: 17 de Dezembro de 2014
+
+-----------------------------------------
+-- Recesso 19 de Dezembro - 19 de Janeiro
+-----------------------------------------
+
+-----------------------------------------
+-- Data do EE: 23 de Janeiro 
+-----------------------------------------
+
+Atividade 2: Experiencia com algoritmo de points-to
+
+Atividade: Preparar casos de teste envolvendo as aplicacoes que estao
+no repositorio.  O commit "369c226f45d740072f73f7026220eb103d283155"
+mostra exemplo de um teste que usa analise de points-to para fazer
+algumas assercoes sobre ponteiros no codigo.
+
+Data da entrega: 20 de Fevereiro 2015
+
+
+
+
+#####################################################################
+
+
+##### Atividade 2: Integracao do RW set com Doop
+
+##### Fonte: (ver 1 e 2)
+
+##### Atividade: Integrar nossa implementacao de RW sets com Doop.  Veja
+##### classe depend.AccessInfo
+
+##### Data da entrega: 
+

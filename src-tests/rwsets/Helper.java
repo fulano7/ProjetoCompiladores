@@ -46,6 +46,7 @@ public class Helper {
     
     return sb.toString();
   }
+<<<<<<< HEAD
 
   /**
    * Uses reflection to obtain the current test name
@@ -69,3 +70,11 @@ public class Helper {
   }
   
 }
+=======
+  
+
+
+
+  
+}
+>>>>>>> professor/master
